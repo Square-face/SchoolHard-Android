@@ -6,7 +6,7 @@
 trigger:
 - main
 
-pool: default
+pool: Default
 
 steps:
 - task: Gradle@2
