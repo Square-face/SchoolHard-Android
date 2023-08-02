@@ -18,6 +18,7 @@ steps:
     publishJUnitResults: false
     testResultsFiles: '**/TEST-*.xml'
     tasks: 'assembleDebug'
+    jdkVersionOption: 1.17
 - task: AndroidSigning@2
   inputs:
     apkFiles: '**/*.apk'
