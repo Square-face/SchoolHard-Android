@@ -24,7 +24,7 @@ steps:
   inputs:
     serverEndpoint: 'Appcenter'
     appSlug: 'sq8/square.face.schoolhard'
-    appFile: 'build/drop/apk/debug'
+    appFile: 'build/drop/*.apk'
     buildVersion: '0.0.3'
     symbolsOption: 'Android'
     releaseNotesOption: 'input'
