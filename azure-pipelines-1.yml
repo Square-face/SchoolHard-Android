@@ -7,7 +7,7 @@ trigger:
 - main
 
 pool:
-  vmImage: macOS-latest
+  vmImage: ubuntu-latest
 
 steps:
 - task: DownloadBuildArtifacts@1
