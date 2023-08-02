@@ -10,7 +10,7 @@ pool:
   vmImage: 'macOS-latest'
 
 steps:
-- task: Gradle@3
+- task: Gradle@2
   inputs:
     workingDirectory: 'app'
     gradleWrapperFile: 'gradlew'
@@ -19,12 +19,5 @@ steps:
     testResultsFiles: '**/TEST-*.xml'
     tasks: 'assembleDebug'
     jdkVersionOption: 1.17
-- task: AndroidSigning@2
-  inputs:
-    apkFiles: '**/*.apk'
-    jarsign: true
-    jarsignerKeystoreFile: 'Release.jks'
-    jarsignerKeystorePassword: '$(keystore)'
-    jarsignerKeystoreAlias: 'release0'
-    jarsignerKeyPassword: '$(keystore)'
-    zipalign: true
+
+- task: PublishBuildArtifacts@1
