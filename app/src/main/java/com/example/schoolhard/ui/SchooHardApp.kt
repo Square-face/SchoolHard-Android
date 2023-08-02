@@ -38,7 +38,7 @@ fun SchoolHardApp(
     SchoolHardTheme {
         val navController = rememberNavController()
         val navigationActions = remember(navController) {
-            JetnewsNavigationActions(navController)
+            SchoolHardNavigationActions(navController)
         }
 
         val coroutineScope = rememberCoroutineScope()

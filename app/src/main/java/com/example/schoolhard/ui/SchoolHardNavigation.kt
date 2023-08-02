@@ -14,7 +14,7 @@ object SchoolHardDestinations {
 /**
  * Models the navigation actions in the app.
  */
-class JetnewsNavigationActions(navController: NavHostController) {
+class SchoolHardNavigationActions(navController: NavHostController) {
     val navigateToHome: () -> Unit = {
         navController.navigate(SchoolHardDestinations.HOME_ROUTE) {
             // Pop up to the start destination of the graph to
