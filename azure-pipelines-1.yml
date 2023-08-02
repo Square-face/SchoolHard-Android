@@ -30,4 +30,5 @@ steps:
     releaseNotesOption: 'input'
     releaseNotesInput: 'New release'
     destinationType: 'groups'
+    isSilent: true
     distributionGroupId: 'dd76dfed-123b-4b4c-8d25-284939037c41'
