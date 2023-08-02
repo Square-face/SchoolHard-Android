@@ -12,7 +12,10 @@ pool:
 steps:
 - task: DownloadBuildArtifacts@1
   inputs:
-    buildType: 'current'
+    buildType: 'specific'
+    project: 'SchoolHard'
+    pipeline: 'Build'
+    buildVersionToDownload: 'latest'
     downloadType: 'single'
     artifactName: 'drop'
     downloadPath: 'build'
