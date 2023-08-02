@@ -27,6 +27,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
+import com.example.schoolhard.ui.schema.SchemaRoute
 
 const val POST_ID = "postId"
 const val SchoolHard_APP_URI = "https://developer.android.com/jetnews"
@@ -50,7 +51,9 @@ fun SchoolHardNavGraph(
                 .clickable { openDrawer() },
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Filled.Menu, null, tint = Color.White, modifier = Modifier.scale(1.5F).padding(15.dp, 10.dp, 0.dp, 10.dp))
+            Icon(Icons.Filled.Menu, null, tint = Color.White, modifier = Modifier
+                .scale(1.5F)
+                .padding(15.dp, 10.dp, 0.dp, 10.dp))
             Spacer(modifier = Modifier.width(30.dp))
             Text(
                 text = "SchoolHard",
@@ -78,7 +81,7 @@ fun SchoolHardNavGraph(
                 Text(modifier = Modifier.padding(30.dp), text="Home")
             }
             composable(SchoolHardDestinations.Today_ROUTE) {
-                Text(modifier = Modifier.padding(30.dp), text="Today")
+                SchemaRoute()
             }
         }
     }
