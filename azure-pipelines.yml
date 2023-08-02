@@ -17,11 +17,6 @@ steps:
     publishJUnitResults: false
     testResultsFiles: '**/TEST-*.xml'
     tasks: 'assembleDebug'
-- task: DownloadSecureFile@1
-  name: ReleaseKey
-  displayName: 'Download release key file'
-  inputs:
-    secureFile: 'Release.jks'
 - task: AndroidSigning@2
   inputs:
     apkFiles: '**/*.apk'
