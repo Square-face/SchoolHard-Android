@@ -15,7 +15,7 @@ steps:
     workingDirectory: 'app'
     gradleWrapperFile: 'gradlew'
     gradleOptions: '-Xmx3072m'
-    publishJUnitResults: false
+    publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
     tasks: 'assembleDebug'
     jdkVersionOption: 1.17
