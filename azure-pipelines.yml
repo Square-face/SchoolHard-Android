@@ -26,7 +26,7 @@ steps:
   inputs:
     apkFiles: '**/*.apk'
     jarsign: true
-    jarsignerKeystoreFile: '$(RelaseKey.secureFilePath)'
+    jarsignerKeystoreFile: 'Release.jks'
     jarsignerKeystorePassword: '$(keystore)'
     jarsignerKeystoreAlias: 'release0'
     jarsignerKeyPassword: '$(keystore)'
