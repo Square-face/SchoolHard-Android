@@ -6,7 +6,8 @@
 trigger:
 - main
 
-pool: Default
+pool:
+  vmImage: 'macOS-latest'
 
 steps:
 - task: Gradle@2
