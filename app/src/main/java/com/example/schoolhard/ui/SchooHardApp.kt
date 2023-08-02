@@ -6,8 +6,10 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -26,7 +28,6 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.example.schoolhard.data.AppContainer
 import com.example.schoolhard.ui.components.AppNavRail
 
 
@@ -38,7 +39,7 @@ fun SchoolHardApp(
     SchoolHardTheme {
         val navController = rememberNavController()
         val navigationActions = remember(navController) {
-            JetnewsNavigationActions(navController)
+            SchoolHardNavigationActions(navController)
         }
 
         val coroutineScope = rememberCoroutineScope()
@@ -64,7 +65,7 @@ fun SchoolHardApp(
             gesturesEnabled = !isExpandedScreen,
             modifier = Modifier.background(MaterialTheme.colorScheme.background)
         ) {
-            Row {
+            Row(Modifier.systemBarsPadding().fillMaxSize()) {
                 if (isExpandedScreen) {
                     AppNavRail(
                         currentRoute = currentRoute,
