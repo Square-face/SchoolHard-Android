@@ -21,3 +21,14 @@ steps:
     jdkVersionOption: 1.17
 
 - task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '**/*.apk'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'JUnit'
+    testResultsFiles: '**/TEST-*.xml'
+    testRunTitle: 'Build test'
+    buildPlatform: 'Gradle'
+    buildConfiguration: 'assembleDebug'
