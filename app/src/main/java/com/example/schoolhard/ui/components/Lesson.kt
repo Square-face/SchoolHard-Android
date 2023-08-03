@@ -24,10 +24,15 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.schoolhard.utils.getDeltaString
+import com.example.schoolhard.utils.getDeltaToNow
+import java.util.Date
 
 @Composable
 fun Lesson(
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    startTime: Date,
+    endTime: Date,
 ){
     val bevel = RoundedCornerShape(8.dp)
     Column(modifier = modifier
@@ -44,7 +49,7 @@ fun Lesson(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             LessonInfo()
-            LessonTime()
+            LessonTime(startTime=startTime, endTime=endTime)
         }
     }
 }
@@ -100,14 +105,14 @@ fun LessonInfo(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun LessonTime(modifier: Modifier = Modifier){
+fun LessonTime(modifier: Modifier = Modifier, startTime: Date, endTime: Date){
     Column(
         modifier = modifier
             .fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.End
     ) {
-        LessonClockTime(showDelta = false)
+        LessonClockTime(time=startTime)
         Text(
             text = "1h 10m",
             style = TextStyle(
@@ -116,26 +121,31 @@ fun LessonTime(modifier: Modifier = Modifier){
                 color = Color(0xFF000000),
             )
         )
-        LessonClockTime()
+        LessonClockTime(time=endTime)
     }
 }
 
 @Composable
-fun LessonClockTime(modifier: Modifier = Modifier, showDelta: Boolean = true){
+fun LessonClockTime(
+    modifier: Modifier = Modifier,
+    time: Date,
+    showDeltaIfPassed: Boolean = true,
+){
     Row(modifier = modifier,
         verticalAlignment = Alignment.CenterVertically) {
-        if (showDelta) {
-
-        Text(
-            text = "17 min",
-            style = TextStyle(
-                fontSize = 12.sp,
-                fontWeight = FontWeight(700),
-                color = Color(0xFF000000),
+        val delta = getDeltaToNow(time)
+        if (delta >= 0){
+            Text(
+                text = getDeltaString(delta),
+                style = TextStyle(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight(700),
+                    color = Color(0xFF000000),
+                )
             )
-        )
-        Spacer(modifier = Modifier.width(7.5.dp))
+            Spacer(modifier = Modifier.width(7.5.dp))
         }
+
         Text(
             text = "10:10",
             style = TextStyle(

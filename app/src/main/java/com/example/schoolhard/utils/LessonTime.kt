@@ -1,0 +1,55 @@
+package com.example.schoolhard.utils
+
+import java.util.Date
+import kotlin.math.floor
+
+const val MillisInSec   = (1000)
+const val MillisInMin   = (MillisInSec*60)
+const val MillisInHour  = (MillisInMin*60)
+const val MillisInDay   = (MillisInHour*24)
+
+fun getDeltaToNow(time: Date): Long{
+    /**Get time delta in milliseconds from [time] to now
+     * */
+    val now = Date()
+    return getDelta(now, time)
+}
+
+fun getDelta(from: Date, to: Date): Long{
+    return to.time - from.time
+}
+
+fun getDeltaString(time: Long): String{
+    var time = time
+
+    val days = floor((time / MillisInDay).toDouble()).toInt()
+    time -= (days * MillisInDay).toLong()
+
+    val hours = floor((time / MillisInHour).toDouble()).toInt()
+    time -= (hours * MillisInHour).toLong()
+
+    val minutes = floor((time / MillisInMin).toDouble()).toInt()
+    time -= (minutes * MillisInMin).toLong()
+
+    if (days==0 && hours == 0 && minutes == 0){
+        return "now!"
+    }
+
+    if (days > 1){
+        return "$days days"
+    }
+
+    var result = ""
+
+    if (days != 0){
+        result += "$days days "
+    }
+    if (hours != 0){
+        result += "$hours h "
+    }
+    if (minutes != 0){
+        result += "$minutes min "
+    }
+
+    return result.dropLast(1)
+}
