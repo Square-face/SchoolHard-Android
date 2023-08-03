@@ -22,7 +22,7 @@ steps:
 - task: AndroidSigning@3
   inputs:
     apkFiles: '**/*.apk'
-    apksignerKeystoreFile: 'Release.jks'
+    apksignerKeystoreFile: '/Release.jks'
     apksignerKeystorePassword: '$(keystore)'
     apksignerKeystoreAlias: 'relelase0'
     apksignerKeyPassword: '$(keystore)'
