@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import com.example.schoolhard.utils.getDelta
 import com.example.schoolhard.utils.getDeltaString
 import com.example.schoolhard.utils.getDeltaToNow
+import com.example.schoolhard.utils.getProgress
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -40,6 +41,9 @@ fun Lesson(
     modifier: Modifier = Modifier,
     startTime: Date,
     endTime: Date,
+    title: String,
+    room: String,
+    teacher: String,
 ){
     val bevel = RoundedCornerShape(8.dp)
     Column(modifier = modifier
@@ -48,14 +52,23 @@ fun Lesson(
         .background(MaterialTheme.colorScheme.secondary, shape = bevel)
         .clip(bevel)
     ) {
-        ProgressBar(progress = 0.75F)
+        val progress = remember { mutableStateOf(getProgress(startTime, Date(), endTime)) }
+
+        LaunchedEffect(true) {
+            while (true) {
+                progress.value = getProgress(startTime, Date(), endTime)
+                delay(1000)
+            }
+        }
+
+        ProgressBar(progress = progress.value)
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(start = 8.dp, bottom = 5.dp, end = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            LessonInfo()
+            LessonInfo(title = title, room = room, teacher = teacher)
             LessonTime(startTime=startTime, endTime=endTime)
         }
     }
@@ -78,14 +91,19 @@ fun ProgressBar(modifier: Modifier = Modifier, progress: Float = 0F){
 }
 
 @Composable
-fun LessonInfo(modifier: Modifier = Modifier) {
+fun LessonInfo(
+    modifier: Modifier = Modifier,
+    title: String,
+    room: String,
+    teacher: String,
+    ) {
     Column(
         modifier = modifier
             .fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = "Lesson",
+            text = title,
             style = TextStyle(
                 fontSize = 20.sp,
                 fontWeight = FontWeight(600),
@@ -93,7 +111,7 @@ fun LessonInfo(modifier: Modifier = Modifier) {
             )
         )
         Text(
-            text = "Room",
+            text = room,
             style = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = FontWeight(500),
@@ -101,7 +119,7 @@ fun LessonInfo(modifier: Modifier = Modifier) {
             )
         )
         Text(
-            text = "Teacher Name",
+            text = teacher,
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight(400),
@@ -137,11 +155,11 @@ fun LessonTime(modifier: Modifier = Modifier, startTime: Date, endTime: Date){
 fun LessonClockTime(
     modifier: Modifier = Modifier,
     time: Date,
-    showDeltaIfPassed: Boolean = true,
+    // showDeltaIfPassed: Boolean = true,
 ){
     Row(modifier = modifier,
         verticalAlignment = Alignment.CenterVertically) {
-        val clockFormat = SimpleDateFormat("hh:mm", Locale.ENGLISH)
+        val clockFormat = SimpleDateFormat("HH:mm", Locale.ENGLISH)
 
         val delta = remember {
             mutableStateOf(getDeltaToNow(time))

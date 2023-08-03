@@ -21,16 +21,16 @@ fun Schema(modifier: Modifier = Modifier) {
 
         val t1 = Date(now - 60*60*1000*2)
         val t2 = Date(now - 60*60*1000*1)
-        Lesson(startTime=t1, endTime=t2)
+        Lesson(startTime=t1, endTime=t2, title = "Lesson", room="Room", teacher = "Teacher Name")
 
-        val t3 = Date(now - 60*1000*45)
-        val t4 = Date(now + 60*1000*1)
-        Lesson(startTime=t3, endTime=t4)
+        val t3 = Date(now - 60*1000*1)
+        val t4 = Date(now + 30*1000)
+        Lesson(startTime=t3, endTime=t4, title = "Lesson", room="Room", teacher = "Teacher Name")
 
 
         val t5 = Date(now + 60*1000*15)
         val t6 = Date(now + 60*1000*25 + 60*60*1000*1)
-        Lesson(startTime=t5, endTime=t6)
+        Lesson(startTime=t5, endTime=t6, title = "Lesson", room="Room", teacher = "Teacher Name")
 
     }
 }

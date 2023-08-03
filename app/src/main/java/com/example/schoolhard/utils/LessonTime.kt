@@ -19,8 +19,8 @@ fun getDelta(from: Date, to: Date): Long{
     return to.time - from.time
 }
 
-fun getDeltaString(time: Long): String{
-    var time = time
+fun getDeltaString(t: Long): String{
+    var time = t
 
     val days = floor((time / MillisInDay).toDouble()).toInt()
     time -= (days * MillisInDay).toLong()
@@ -59,4 +59,17 @@ fun getDeltaString(time: Long): String{
     }
 
     return result.dropLast(1)
+}
+
+fun getProgress(startTime: Date, now: Date, endTime: Date): Float {
+    val lessonTime = endTime.time - startTime.time
+    val passedTime = now.time - startTime.time
+
+    if (passedTime < 0){
+        return 0F
+    }
+    if (passedTime > lessonTime){
+        return 1F
+    }
+    return passedTime.toFloat()/lessonTime.toFloat()
 }
