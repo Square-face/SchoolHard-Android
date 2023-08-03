@@ -31,8 +31,15 @@ fun getDeltaString(time: Long): String{
     val minutes = floor((time / MillisInMin).toDouble()).toInt()
     time -= (minutes * MillisInMin).toLong()
 
+    val seconds = floor((time / MillisInSec).toDouble()).toInt()
+    time -= (seconds * MillisInSec).toLong()
+
     if (days==0 && hours == 0 && minutes == 0){
-        return "now!"
+        if (seconds == 0){return "now!"}
+        return "$seconds sec"
+    }
+    if (days==0 && hours == 0 && minutes == 1){
+        return "60 sec"
     }
 
     if (days > 1){

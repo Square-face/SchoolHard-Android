@@ -16,6 +16,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -24,9 +27,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.schoolhard.utils.getDelta
 import com.example.schoolhard.utils.getDeltaString
 import com.example.schoolhard.utils.getDeltaToNow
+import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
 import java.util.Date
+import java.util.Locale
 
 @Composable
 fun Lesson(
@@ -45,7 +52,7 @@ fun Lesson(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(start = 8.dp, bottom=5.dp, end=8.dp),
+                .padding(start = 8.dp, bottom = 5.dp, end = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             LessonInfo()
@@ -113,8 +120,9 @@ fun LessonTime(modifier: Modifier = Modifier, startTime: Date, endTime: Date){
         horizontalAlignment = Alignment.End
     ) {
         LessonClockTime(time=startTime)
+        val delta = getDelta(startTime, endTime)
         Text(
-            text = "1h 10m",
+            text = getDeltaString(delta),
             style = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = FontWeight(500),
@@ -133,10 +141,23 @@ fun LessonClockTime(
 ){
     Row(modifier = modifier,
         verticalAlignment = Alignment.CenterVertically) {
-        val delta = getDeltaToNow(time)
-        if (delta >= 0){
+        val clockFormat = SimpleDateFormat("hh:mm", Locale.ENGLISH)
+
+        val delta = remember {
+            mutableStateOf(getDeltaToNow(time))
+        }
+
+        LaunchedEffect(true) {
+            while (true) {
+                delta.value = getDeltaToNow(time)
+                delay(1000)
+            }
+        }
+
+        if (delta.value >= 0){
+
             Text(
-                text = getDeltaString(delta),
+                text = getDeltaString(delta.value),
                 style = TextStyle(
                     fontSize = 12.sp,
                     fontWeight = FontWeight(700),
@@ -147,7 +168,7 @@ fun LessonClockTime(
         }
 
         Text(
-            text = "10:10",
+            text = clockFormat.format(time),
             style = TextStyle(
                 fontSize = 14.sp,
                 fontWeight = FontWeight(400),

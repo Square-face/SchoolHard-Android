@@ -24,7 +24,7 @@ fun Schema(modifier: Modifier = Modifier) {
         Lesson(startTime=t1, endTime=t2)
 
         val t3 = Date(now - 60*1000*45)
-        val t4 = Date(now + 60*1000*5)
+        val t4 = Date(now + 60*1000*1)
         Lesson(startTime=t3, endTime=t4)
 
 
