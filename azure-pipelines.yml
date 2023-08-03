@@ -24,7 +24,7 @@ steps:
     apkFiles: '**/*.apk'
     apksignerKeystoreFile: 'Release.jks'
     apksignerKeystorePassword: '$(keystore)'
-    apksignerKeystoreAlias: 'relelase0'
+    apksignerKeystoreAlias: 'release0'
     apksignerKeyPassword: '$(keystore)'
 - task: PublishBuildArtifacts@1
   inputs:
