@@ -3,9 +3,6 @@
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
 
-trigger:
-- main
-
 pool:
   vmImage: ubuntu-latest
 
@@ -25,10 +22,10 @@ steps:
     serverEndpoint: 'Appcenter'
     appSlug: 'SQ8/SchoolHard'
     appFile: 'build/drop/app-debug.apk'
-    buildVersion: '0.0.3'
+    buildVersion: '$(build_version)'
     symbolsOption: 'Android'
     releaseNotesOption: 'input'
-    releaseNotesInput: 'New release'
+    releaseNotesInput: '$(release_notes)'
     destinationType: 'groups'
     isSilent: true
-    distributionGroupId: 'dd76dfed-123b-4b4c-8d25-284939037c41'
+    distributionGroupId: 'dd76dfed-123b-4b4c-8d25-284939037c41,39081346-bdf6-45e9-9725-04701fc57f86'
