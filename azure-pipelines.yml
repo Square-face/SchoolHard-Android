@@ -19,16 +19,15 @@ steps:
     testResultsFiles: '**/TEST-*.xml'
     tasks: 'assembleDebug'
     jdkVersionOption: 1.17
-
+- task: AndroidSigning@3
+  inputs:
+    apkFiles: '**/*.apk'
+    apksignerKeystoreFile: 'Release.jsk'
+    apksignerKeystorePassword: '$(keystore)'
+    apksignerKeystoreAlias: 'relelase0'
+    apksignerKeyPassword: '$(keystore)'
 - task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: 'app/build/outputs/apk/debug'
     ArtifactName: 'drop'
     publishLocation: 'Container'
-- task: PublishTestResults@2
-  inputs:
-    testResultsFormat: 'JUnit'
-    testResultsFiles: 'app/build/test-results/testDebugUnitTest/'
-    testRunTitle: 'Build test'
-    buildPlatform: 'Gradle'
-    buildConfiguration: 'assembleDebug'
