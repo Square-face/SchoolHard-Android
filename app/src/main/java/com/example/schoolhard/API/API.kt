@@ -1,10 +1,12 @@
 package com.example.schoolhard.API
 
-import okhttp3.ResponseBody
+import android.util.Log
+import okhttp3.Response
+import org.json.JSONObject
 import java.util.Date
 
 enum class userType{
-    Student, Parent, Teacher
+    Unknown, Student, Parent, Teacher
 }
 
 open class User(
@@ -29,61 +31,64 @@ enum class APIResponseType{
 }
 
 enum class APIResponseFailureReason{
-    InvalidAuth, NotLoggedIn, InvalidAPIClass
+    InvalidAuth, NotLoggedIn, InvalidAPIClass, InternalServerError
 }
-
-open class APIResponse(
-    val type: APIResponseType,
-    val body: ResponseBody?
-)
 
 class Filter(
     val from: Date,
     val to: Date,
 )
 
+open class APIResponse(
+    val type: APIResponseType,
+    val response: Response,
+    val body: JSONObject?,
+)
+
 class SuccessfulAPIResponse(
-    body: ResponseBody
-): APIResponse(APIResponseType.Success, body)
+    response: Response,
+    body: JSONObject?,
+): APIResponse(APIResponseType.Success, response, body)
 
 class FailedAPIResponse(
     val reason: APIResponseFailureReason,
     val message: String,
-    body: ResponseBody?
-): APIResponse(APIResponseType.Failed, body)
+    response: Response,
+    body: JSONObject?
+): APIResponse(APIResponseType.Failed, response, body)
 
 open class API() {
     var status: APIStatus = APIStatus.Disconnected
-    open fun login(user: User): APIResponse{ return FailedAPIResponse(
-        APIResponseFailureReason.InvalidAPIClass,
-        "This function is from the base class and has no functionality",
-        null) }
-    open fun logout(): APIResponse{ return FailedAPIResponse(
-        APIResponseFailureReason.InvalidAPIClass,
-        "This function is from the base class and has no functionality",
-        null) }
+    open fun login(
+        user: User,
+        failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("Request", response.message)},
+        successCallback: (SuccessfulAPIResponse)->(Unit),
+    ){}
 
-    open fun lessons(filter: Filter): APIResponse{
-        return FailedAPIResponse(
-            APIResponseFailureReason.InvalidAPIClass,
-            "This function is from the base class and has no functionality",
-            null) }
+    open fun logout(
+        failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("Request", response.message)},
+        successCallback: (SuccessfulAPIResponse)->(Unit),
+    ){}
 
-    open fun lunch(filter: Filter): APIResponse{
-        return FailedAPIResponse(
-            APIResponseFailureReason.InvalidAPIClass,
-            "This function is from the base class and has no functionality",
-            null) }
+    open fun lessons(
+        filter: Filter,
+        failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("Request", response.message)},
+        successCallback: (SuccessfulAPIResponse)->(Unit),
+    ){}
 
-    open fun userInfo(): APIResponse{
-        return FailedAPIResponse(
-            APIResponseFailureReason.InvalidAPIClass,
-            "This function is from the base class and has no functionality",
-            null) }
+    open fun lunch(
+        filter: Filter,
+        failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("Request", response.message)},
+        successCallback: (SuccessfulAPIResponse)->(Unit),
+    ){}
 
-    open fun schools(): APIResponse{
-        return FailedAPIResponse(
-            APIResponseFailureReason.InvalidAPIClass,
-            "This function is from the base class and has no functionality",
-            null) }
+    open fun userInfo(
+        failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("Request", response.message)},
+        successCallback: (SuccessfulAPIResponse)->(Unit),
+    ){}
+
+    open fun schools(
+        failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("Request", response.message)},
+        successCallback: (SuccessfulAPIResponse)->(Unit),
+    ){}
 }
