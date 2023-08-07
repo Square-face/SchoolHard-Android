@@ -15,7 +15,7 @@ const val BASE_URL = "https://sms.schoolsoft.se"
 class SchoolSoftAPI():API() {
     var appKey: String? = null
     var token: String? = null
-    var tokenExpiry: String? = null
+    var tokenExpiry: Long? = null
     val client = OkHttpClient()
     var SCHOOL_URL: String? = null
 
@@ -84,4 +84,14 @@ class SchoolSoftAPI():API() {
             }
         })
     }
+
+    override fun logout(
+        failureCallback: (FailedAPIResponse) -> Unit,
+        successCallback: (SuccessfulAPIResponse) -> Unit
+    ) {
+        appKey = null
+        token = null
+        tokenExpiry = null
+    }
+
 }

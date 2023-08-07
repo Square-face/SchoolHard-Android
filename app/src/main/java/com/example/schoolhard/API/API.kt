@@ -22,6 +22,19 @@ class Student(
     school: String
 ): User(userType = userType.Student, username = username, password = password, school = school)
 
+class Occasion(
+    val week: Int,
+    val room: String,
+    val teacher: String,
+    val startTime: Date,
+    val endTime: Date,
+)
+class Lesson(
+    val name: String,
+    val id: String,
+    val occasions: List<Occasion>,
+)
+
 enum class APIStatus{
     Loggedin, Loggedout, Disconnected
 }
@@ -50,6 +63,12 @@ class SuccessfulAPIResponse(
     body: JSONObject?,
 ): APIResponse(APIResponseType.Success, response, body)
 
+class SuccessfulLessonResponse(
+    response: Response,
+    body: JSONObject,
+    val lessons: List<Lesson>
+): APIResponse(APIResponseType.Success, response, body)
+
 class FailedAPIResponse(
     val reason: APIResponseFailureReason,
     val message: String,
@@ -73,7 +92,7 @@ open class API() {
     open fun lessons(
         filter: Filter,
         failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("Request", response.message)},
-        successCallback: (SuccessfulAPIResponse)->(Unit),
+        successCallback: (SuccessfulLessonResponse)->(Unit),
     ){}
 
     open fun lunch(
