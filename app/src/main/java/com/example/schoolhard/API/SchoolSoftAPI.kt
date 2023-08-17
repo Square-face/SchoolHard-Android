@@ -138,6 +138,78 @@ class SchoolSoftAPI:API() {
         }
     }
 
+    fun get_token(
+        failureCallback: (FailedAPIResponse) -> Unit,
+        successCallback: (SuccessfulTokenResponse) -> Unit
+    ) {
+        // If the token is null the user is not logged in at that must happen first
+        if (appKey == null) {
+            failureCallback(
+                FailedAPIResponse(
+                    APIResponseFailureReason.NotLoggedIn,
+                    "User not logged in",
+                    null,
+                    null)
+            )
+
+            return
+        }
+
+        // get token request
+        val request = Request.Builder()
+            .url("$SCHOOL_URL/rest/app/token")
+            .addHeader("appversion", "2.3.2")
+            .addHeader("appos", "android")
+            .addHeader("appkey", appKey!!)
+            .addHeader("deviceid", "")
+            .build()
+
+        // execute request
+        execute(
+            request,
+            failureCallback,
+        ){
+            // body can't be null
+            it.body!!
+
+            // get token
+            token = it.body.getString("token")
+            Log.v("SchoolSoftAPI - Token", "Token: $token")
+
+            // get expiration date
+            val expiry = it.body.getString("expiryDate")
+            tokenExpiry = get_expiry_from_string(expiry)
+            Log.v("SchoolSoftAPI - Token", "expiry: $tokenExpiry")
+        }
+    }
+
+    fun smart_token(
+        failureCallback: (FailedAPIResponse) -> Unit,
+        successCallback: (SuccessfulTokenResponse) -> Unit
+    ){
+        if (tokenExpiry == null) {
+            Log.w("SchoolSoftAPI - SmartToken", "No token, generating")
+            get_token(failureCallback, successCallback)
+            return
+        }
+
+        val now = Date()
+        if (tokenExpiry!! < now.time + MillisInMin*10) {
+            Log.w("SchoolSoftAPI - SmartToken", "Token to old, generating new")
+            get_token(failureCallback, successCallback)
+            return
+        }
+
+        // if token has at least 10 minutes of lifetime left
+        // do nothing and return already stored token
+        successCallback(
+            SuccessfulTokenResponse(
+                token!!,
+                tokenExpiry!!
+            )
+        )
+    }
+
     override fun logout(
         failureCallback: (FailedAPIResponse) -> Unit,
         successCallback: (SuccessfulAPIResponse) -> Unit
