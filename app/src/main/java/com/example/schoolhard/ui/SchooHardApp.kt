@@ -28,6 +28,9 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.schoolhard.API.SchoolSoftAPI
+import com.example.schoolhard.API.User
+import com.example.schoolhard.API.userType
 import com.example.schoolhard.ui.components.AppNavRail
 
 
