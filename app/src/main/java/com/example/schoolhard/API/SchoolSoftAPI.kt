@@ -24,12 +24,12 @@ class SuccessfulTokenResponse(
 ): APIResponse(APIResponseType.Success, null, null)
 
 class SchoolSoftAPI:API() {
-    var appKey: String? = null
-    var token: String? = null
-    var tokenExpiry: Long? = null
-    var org_id = 1 // TODO: extract org_id from api
-    val client = OkHttpClient()
-    var SCHOOL_URL: String? = null
+    private var appKey: String? = null
+    private var token: String? = null
+    private var tokenExpiry: Long? = null
+    private var orgId = 1 // TODO: extract org_id from api
+    private val client = OkHttpClient()
+    private var schoolUrl: String? = null
 
     private fun execute(
             request: Request,
@@ -89,13 +89,13 @@ class SchoolSoftAPI:API() {
         return SuccessfulAPIResponse(response, body)
     }
 
-    private fun get_expiry_from_string(expiry: String): Long{
+    private fun getExpiryFromString(expiry: String): Long{
         val format = SimpleDateFormat("yyyy-mm-dd hh:MM:ss", Locale.ENGLISH)
         val date = format.parse(expiry)
         return date.time
     }
 
-    private fun build_request(url: String, token: String): Request {
+    private fun buildRequest(url: String, token: String): Request {
         Log.v("SchoolSoftAPI", "building request")
         return Request.Builder()
             .url(url)
@@ -111,7 +111,7 @@ class SchoolSoftAPI:API() {
         failureCallback: (FailedAPIResponse) -> Unit,
         successCallback: (SuccessfulAPIResponse) -> Unit
     ) {
-        SCHOOL_URL = "$BASE_URL/${user.school}"
+        schoolUrl = "$BASE_URL/${user.school}"
 
         val body = FormBody.Builder()
             .add("identification", user.username)
@@ -121,29 +121,30 @@ class SchoolSoftAPI:API() {
             .build()
 
         val request = Request.Builder()
-            .url("$SCHOOL_URL/rest/app/login")
+            .url("$schoolUrl/rest/app/login")
             .post(body)
             .build()
 
         execute(request,
             failureCallback) {
-            it.body !!
 
             // get appKey
             appKey = it.body.getString("appKey")
             Log.v("SchoolSoftAPI - Login", "AppKey: $appKey")
 
             // run callback
+            status.connected = true
+            status.loggedin = true
             successCallback(it)
         }
     }
 
-    fun get_token(
+    fun getToken(
         failureCallback: (FailedAPIResponse) -> Unit,
         successCallback: (SuccessfulTokenResponse) -> Unit
     ) {
         // If the token is null the user is not logged in at that must happen first
-        if (appKey == null) {
+        if (!status.loggedin) {
             failureCallback(
                 FailedAPIResponse(
                     APIResponseFailureReason.NotLoggedIn,
@@ -157,7 +158,7 @@ class SchoolSoftAPI:API() {
 
         // get token request
         val request = Request.Builder()
-            .url("$SCHOOL_URL/rest/app/token")
+            .url("$schoolUrl/rest/app/token")
             .addHeader("appversion", "2.3.2")
             .addHeader("appos", "android")
             .addHeader("appkey", appKey!!)
@@ -169,8 +170,6 @@ class SchoolSoftAPI:API() {
             request,
             failureCallback,
         ){
-            // body can't be null
-            it.body!!
 
             // get token
             token = it.body.getString("token")
@@ -178,25 +177,32 @@ class SchoolSoftAPI:API() {
 
             // get expiration date
             val expiry = it.body.getString("expiryDate")
-            tokenExpiry = get_expiry_from_string(expiry)
+            tokenExpiry = getExpiryFromString(expiry)
             Log.v("SchoolSoftAPI - Token", "expiry: $tokenExpiry")
+
+            successCallback(
+                SuccessfulTokenResponse(
+                    token!!,
+                    tokenExpiry!!,
+                )
+            )
         }
     }
 
-    fun smart_token(
+    fun smartToken(
         failureCallback: (FailedAPIResponse) -> Unit,
         successCallback: (SuccessfulTokenResponse) -> Unit
     ){
         if (tokenExpiry == null) {
             Log.w("SchoolSoftAPI - SmartToken", "No token, generating")
-            get_token(failureCallback, successCallback)
+            getToken(failureCallback, successCallback)
             return
         }
 
         val now = Date()
         if (tokenExpiry!! < now.time + MillisInMin*10) {
             Log.w("SchoolSoftAPI - SmartToken", "Token to old, generating new")
-            get_token(failureCallback, successCallback)
+            getToken(failureCallback, successCallback)
             return
         }
 
@@ -217,6 +223,7 @@ class SchoolSoftAPI:API() {
         appKey = null
         token = null
         tokenExpiry = null
+        status.loggedin = false
     }
 
 }
