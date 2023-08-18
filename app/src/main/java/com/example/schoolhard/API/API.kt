@@ -3,6 +3,8 @@ package com.example.schoolhard.API
 import android.util.Log
 import okhttp3.Response
 import org.json.JSONObject
+import java.time.DayOfWeek
+import java.time.LocalDateTime
 import java.util.Date
 
 enum class userType{
@@ -24,19 +26,21 @@ class Student(
 
 class Occasion(
     val week: Int,
+    val weekDay: DayOfWeek,
     val place: String,
     val teacher: String,
-    val startTime: Date,
-    val endTime: Date,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
 )
 class Lesson(
     val name: String,
-    val id: String,
-    val occasions: List<Occasion>,
+    val id: Int,
+    val externalId: String,
 )
 
-enum class APIStatus{
-    Loggedin, Loggedout, Disconnected
+class APIStatus{
+    var connected = false
+    var loggedin = false
 }
 
 enum class APIResponseType{
@@ -44,30 +48,29 @@ enum class APIResponseType{
 }
 
 enum class APIResponseFailureReason{
-    InvalidAuth, NotLoggedIn, InvalidAPIClass, InternalServerError, ConnectionFailure, NullError
+    InvalidAuth, NotLoggedIn, InternalServerError, ConnectionFailure, NullError
 }
 
 class Filter(
-    val from: Date,
-    val to: Date,
+    val from: LocalDateTime,
+    val to: LocalDateTime,
+    val maxCount: Int,
 )
 
 open class APIResponse(
     val type: APIResponseType,
-    val response: Response?,
-    val body: JSONObject?,
+    open val response: Response?,
+    open val body: JSONObject?,
 )
 
 class SuccessfulAPIResponse(
-    response: Response,
-    body: JSONObject,
+    override val response: Response,
+    override val body: JSONObject,
 ): APIResponse(APIResponseType.Success, response, body)
 
 class SuccessfulLessonResponse(
-    response: Response,
-    body: JSONObject,
-    val lessons: List<Lesson>
-): APIResponse(APIResponseType.Success, response, body)
+    val lessons: List<Occasion>
+): APIResponse(APIResponseType.Success, null, null)
 
 class FailedAPIResponse(
     val reason: APIResponseFailureReason,
@@ -77,7 +80,7 @@ class FailedAPIResponse(
 ): APIResponse(APIResponseType.Failed, response, body)
 
 open class API() {
-    var status: APIStatus = APIStatus.Disconnected
+    var status = APIStatus()
     open fun login(
         user: User,
         failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("API", response.message)},
