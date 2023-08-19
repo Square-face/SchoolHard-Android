@@ -1,5 +1,7 @@
 package com.example.schoolhard.utils
 
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.Date
 import kotlin.math.floor
 
@@ -8,15 +10,15 @@ const val MillisInMin   = (MillisInSec*60)
 const val MillisInHour  = (MillisInMin*60)
 const val MillisInDay   = (MillisInHour*24)
 
-fun getDeltaToNow(time: Date): Long{
+fun getDeltaToNow(time: LocalDateTime): Long{
     /**Get time delta in milliseconds from [time] to now
      * */
-    val now = Date()
+    val now = LocalDateTime.now()
     return getDelta(now, time)
 }
 
-fun getDelta(from: Date, to: Date): Long{
-    return to.time - from.time
+fun getDelta(from: LocalDateTime, to: LocalDateTime): Long{
+    return ChronoUnit.MILLIS.between(from, to)
 }
 
 fun getDeltaString(t: Long): String{
@@ -61,9 +63,9 @@ fun getDeltaString(t: Long): String{
     return result.dropLast(1)
 }
 
-fun getProgress(startTime: Date, now: Date, endTime: Date): Float {
-    val lessonTime = endTime.time - startTime.time
-    val passedTime = now.time - startTime.time
+fun getProgress(startTime: LocalDateTime, now: LocalDateTime, endTime: LocalDateTime): Float {
+    val lessonTime = getDelta(startTime, endTime)
+    val passedTime = getDelta(startTime, now)
 
     if (passedTime < 0){
         return 0F

@@ -1,5 +1,6 @@
 package com.example.schoolhard.ui
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
@@ -28,16 +29,23 @@ import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.example.schoolhard.API.API
+import com.example.schoolhard.API.Filter
 import com.example.schoolhard.API.SchoolSoftAPI
+import com.example.schoolhard.API.Student
 import com.example.schoolhard.API.User
 import com.example.schoolhard.API.userType
 import com.example.schoolhard.ui.components.AppNavRail
-
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoField
+import java.time.temporal.IsoFields
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SchoolHardApp(
     widthSizeClass: WindowWidthSizeClass,
+    api: API,
 ) {
     SchoolHardTheme {
         val navController = rememberNavController()
@@ -77,6 +85,7 @@ fun SchoolHardApp(
                     )
                 }
                 SchoolHardNavGraph(
+                    api = api,
                     isExpandedScreen = isExpandedScreen,
                     navController = navController,
                     openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },

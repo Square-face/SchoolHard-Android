@@ -1,5 +1,6 @@
 package com.example.schoolhard.ui
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,12 +29,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navDeepLink
+import com.example.schoolhard.API.API
+import com.example.schoolhard.API.Filter
 import com.example.schoolhard.ui.schema.SchemaRoute
+import java.time.LocalDateTime
 
 const val POST_ID = "postId"
 const val SchoolHard_APP_URI = "https://developer.android.com/jetnews"
 @Composable
 fun SchoolHardNavGraph(
+    api: API,
     isExpandedScreen: Boolean,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
@@ -81,7 +87,7 @@ fun SchoolHardNavGraph(
                 Text(modifier = Modifier.padding(30.dp), text="Home")
             }
             composable(SchoolHardDestinations.Today_ROUTE) {
-                SchemaRoute()
+                SchemaRoute(api = api)
             }
         }
     }
