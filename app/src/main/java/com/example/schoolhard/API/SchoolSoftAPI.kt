@@ -8,16 +8,27 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 import java.text.SimpleDateFormat
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoField
+import java.time.temporal.IsoFields
 import java.util.Date
+import java.util.Dictionary
 import java.util.Locale
 
 const val BASE_URL = "https://sms.schoolsoft.se"
 const val app_version = "2.3.2"
 const val app_os = "android"
 const val device_id = ""
+val timeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.S")
+
 class SuccessfulTokenResponse(
     val token: String,
     val expiry: Long,
@@ -71,22 +82,22 @@ class SchoolSoftAPI:API() {
     }
 
     private fun processResponse(response: Response): APIResponse{
-        val body = response.body?.string()?.let { JSONObject(it) }
+        val body = response.body
 
         if (response.code == 401) {
             Log.w("SchoolsoftAPI", "Access denied")
-            return FailedAPIResponse(APIResponseFailureReason.InvalidAuth, "Incorrect login information", response, body)
+            return FailedAPIResponse(APIResponseFailureReason.InvalidAuth, "Incorrect login information", response, body?.string())
         }
         if (response.code == 500) {
             Log.w("SchoolsoftAPI", "Internal server error")
-            return FailedAPIResponse(APIResponseFailureReason.InternalServerError, "Unexpected error occurred", response, body)
+            return FailedAPIResponse(APIResponseFailureReason.InternalServerError, "Unexpected error occurred", response, body?.string())
         }
         if (body == null){
             Log.w("SchoolsoftAPI", "Response content was null")
             return FailedAPIResponse(APIResponseFailureReason.NullError, "Null Error", response, null)
         }
 
-        return SuccessfulAPIResponse(response, body)
+        return SuccessfulAPIResponse(response, body.string())
     }
 
     private fun getExpiryFromString(expiry: String): Long{
@@ -104,6 +115,99 @@ class SchoolSoftAPI:API() {
             .addHeader("token", token)
             .addHeader("deviceid", device_id)
             .build()
+    }
+
+    private fun jsonArrayToList(jsonArray: JSONArray): List<JSONObject> {
+        val list = mutableListOf<JSONObject>()
+        for (i in 0 until jsonArray.length()) {
+            list.add(jsonArray.getJSONObject(i))
+        }
+        return list
+    }
+
+    private fun getTime(raw: String): LocalTime{
+        // "1970-01-01 08:20:00.0" -> "08:20:00.0"
+        val time = raw.split(" ").last()
+        return LocalTime.parse(time, timeFormat)
+    }
+
+    private fun getDate(week: Int, dayOfWeek: DayOfWeek): LocalDate {
+        var date = LocalDate.now()
+
+        if (week < 27) {date = date.with(ChronoField.YEAR, date.year+1L)}
+
+        date = date.with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, week.toLong())
+        date = date.with(ChronoField.DAY_OF_WEEK, dayOfWeek.value.toLong())
+
+        return date
+    }
+
+    private fun getWeeks(event: JSONObject): List<Int>{
+
+        val periods = event.getString("weeksString").split(", ")
+        val results: List<Int> = periods.flatMap {period ->
+            val span = period.split("-")
+            if (span.size == 1) {
+                listOf(period.toInt())
+            } else {
+                val (start, end) = span.map { it.toInt() }
+                start..end
+            }
+        }
+
+        return results
+    }
+
+    private fun getOccasion(event: JSONObject, week: Int): Occasion{
+        val dayOfWeek = DayOfWeek.of(event.getInt("dayId")+1)
+        return Occasion(
+            Lesson(
+                event.getString("subjectName"),
+                event.getString("subjectName").split(" - ").subList(1, event.getString("subjectName").split(" - ").size).joinToString(" "),
+                event.getInt("id"),
+                event.getString("externalId")
+            ),
+            week,
+            dayOfWeek,
+            event.getString("roomName"),
+            "<placeholder>",
+            getDate(week, dayOfWeek),
+            getTime(event.getString("startTime")),
+            getTime(event.getString("endTime")),
+        )
+    }
+
+    private fun filterLessons(filter: Filter, occasions: List<Occasion>): List<Occasion>{
+        return occasions
+            .filter { occasion -> !filter.from.isAfter(occasion.date.atTime(occasion.startTime)) }
+            .filter { occasion -> !filter.to.isBefore(occasion.date.atTime(occasion.endTime)) }
+            .take(filter.maxCount)
+    }
+
+    private fun parseLessons(
+        response: SuccessfulAPIResponse,
+        filter: Filter?,
+        successCallback: (SuccessfulLessonResponse) -> Unit
+    ){
+        val occasions = mutableMapOf<Int, MutableList<Occasion>>()
+        val body = jsonArrayToList(JSONArray(response.body))
+
+        body.flatMap { event ->
+            getWeeks(event).map { week ->
+                Pair(week, getOccasion(event, week))
+            }
+
+        }.forEach { (week, occasion) ->
+            occasions.getOrPut(week){ mutableListOf() }
+                .add(occasion)
+        }
+
+        // flatten dictionary values after sorting based on start time
+        val results = occasions.flatMap { (_, occasions) -> occasions.sortedBy { occasion -> occasion.date.atTime(occasion.startTime) } }
+        val filteredResults = if (filter != null) filterLessons(filter, results) else results
+        Log.v("SchoolSoftAPI - Lessons", "Filtered from ${results.size} entries to ${filteredResults.size}")
+
+        successCallback(SuccessfulLessonResponse(filteredResults))
     }
 
     override fun login(
@@ -127,9 +231,10 @@ class SchoolSoftAPI:API() {
 
         execute(request,
             failureCallback) {
+            val body = JSONObject(it.body)
 
             // get appKey
-            appKey = it.body.getString("appKey")
+            appKey = body.getString("appKey")
             Log.v("SchoolSoftAPI - Login", "AppKey: $appKey")
 
             // run callback
@@ -170,13 +275,14 @@ class SchoolSoftAPI:API() {
             request,
             failureCallback,
         ){
+            val body = JSONObject(it.body)
 
             // get token
-            token = it.body.getString("token")
+            token = body.getString("token")
             Log.v("SchoolSoftAPI - Token", "Token: $token")
 
             // get expiration date
-            val expiry = it.body.getString("expiryDate")
+            val expiry = body.getString("expiryDate")
             tokenExpiry = getExpiryFromString(expiry)
             Log.v("SchoolSoftAPI - Token", "expiry: $tokenExpiry")
 
@@ -226,4 +332,14 @@ class SchoolSoftAPI:API() {
         status.loggedin = false
     }
 
+    override fun lessons(
+        filter: Filter?,
+        failureCallback: (FailedAPIResponse) -> Unit,
+        successCallback: (SuccessfulLessonResponse) -> Unit
+    ) {smartToken(failureCallback){token ->
+        val request = buildRequest("$schoolUrl/api/lessons/student/$orgId", token.token)
+        execute(request, failureCallback){
+            parseLessons(it, filter, successCallback)
+        }
+    }}
 }
