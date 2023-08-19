@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.example.schoolhard.API.API
 import com.example.schoolhard.API.Filter
 import com.example.schoolhard.API.Occasion
-import java.time.LocalDateTime
+import java.time.LocalDate
 
 fun updateSchemaContent(api: API, filter: Filter, lessons: MutableState<List<Occasion>>) {
     api.lessons(filter){
@@ -35,10 +35,17 @@ fun SchemaRoute(modifier: Modifier = Modifier, api: API) {
         val lessons = remember { mutableStateOf<List<Occasion>>(listOf()) }
 
         LaunchedEffect(key1 = true) {
-            updateSchemaContent(api, Filter(LocalDateTime.now(), LocalDateTime.MAX, 10), lessons)
+            updateSchemaContent(
+                api,
+                Filter(
+                    LocalDate.now().atTime(0,0),
+                    LocalDate.now().plusDays(1L).atTime(0,0),
+                    10
+                ),
+                lessons)
         }
 
-        DayInfo()
+        DayInfo { newFilter: Filter -> updateSchemaContent(api, newFilter, lessons) }
         Schema(lessons = lessons)
     }
 }

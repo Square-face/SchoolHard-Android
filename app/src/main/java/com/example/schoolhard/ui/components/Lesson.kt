@@ -32,11 +32,8 @@ import com.example.schoolhard.utils.getDeltaString
 import com.example.schoolhard.utils.getDeltaToNow
 import com.example.schoolhard.utils.getProgress
 import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import java.util.Date
-import java.util.Locale
 
 @Composable
 fun Lesson(
@@ -56,7 +53,7 @@ fun Lesson(
     ) {
         val progress = remember { mutableStateOf(getProgress(startTime, LocalDateTime.now(), endTime)) }
 
-        LaunchedEffect(true) {
+        LaunchedEffect(startTime) {
             while (true) {
                 progress.value = getProgress(startTime, LocalDateTime.now(), endTime)
                 delay(1000)
@@ -159,7 +156,7 @@ fun LessonClockTime(
             mutableStateOf(getDeltaToNow(time))
         }
 
-        LaunchedEffect(true) {
+        LaunchedEffect(time) {
             while (true) {
                 delta.value = getDeltaToNow(time)
                 delay(1000)
