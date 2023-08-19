@@ -32,15 +32,14 @@ import com.example.schoolhard.utils.getDeltaString
 import com.example.schoolhard.utils.getDeltaToNow
 import com.example.schoolhard.utils.getProgress
 import kotlinx.coroutines.delay
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun Lesson(
     modifier: Modifier = Modifier,
-    startTime: Date,
-    endTime: Date,
+    startTime: LocalDateTime,
+    endTime: LocalDateTime,
     title: String,
     room: String,
     teacher: String,
@@ -52,11 +51,11 @@ fun Lesson(
         .background(MaterialTheme.colorScheme.secondary, shape = bevel)
         .clip(bevel)
     ) {
-        val progress = remember { mutableStateOf(getProgress(startTime, Date(), endTime)) }
+        val progress = remember { mutableStateOf(getProgress(startTime, LocalDateTime.now(), endTime)) }
 
-        LaunchedEffect(true) {
+        LaunchedEffect(startTime) {
             while (true) {
-                progress.value = getProgress(startTime, Date(), endTime)
+                progress.value = getProgress(startTime, LocalDateTime.now(), endTime)
                 delay(1000)
             }
         }
@@ -100,12 +99,13 @@ fun LessonInfo(
     Column(
         modifier = modifier
             .fillMaxHeight(),
-        verticalArrangement = Arrangement.SpaceBetween
+        verticalArrangement = Arrangement.Top
     ) {
         Text(
+            modifier=Modifier.fillMaxWidth(0.7f),
             text = title,
             style = TextStyle(
-                fontSize = 20.sp,
+                fontSize = 14.sp,
                 fontWeight = FontWeight(600),
                 color = Color(0xFF000000),
             )
@@ -113,16 +113,8 @@ fun LessonInfo(
         Text(
             text = room,
             style = TextStyle(
-                fontSize = 16.sp,
-                fontWeight = FontWeight(500),
-                color = Color(0xFF000000),
-            )
-        )
-        Text(
-            text = teacher,
-            style = TextStyle(
                 fontSize = 12.sp,
-                fontWeight = FontWeight(400),
+                fontWeight = FontWeight(500),
                 color = Color(0xFF000000),
             )
         )
@@ -130,7 +122,7 @@ fun LessonInfo(
 }
 
 @Composable
-fun LessonTime(modifier: Modifier = Modifier, startTime: Date, endTime: Date){
+fun LessonTime(modifier: Modifier = Modifier, startTime: LocalDateTime, endTime: LocalDateTime){
     Column(
         modifier = modifier
             .fillMaxHeight(),
@@ -154,18 +146,17 @@ fun LessonTime(modifier: Modifier = Modifier, startTime: Date, endTime: Date){
 @Composable
 fun LessonClockTime(
     modifier: Modifier = Modifier,
-    time: Date,
+    time: LocalDateTime,
     // showDeltaIfPassed: Boolean = true,
 ){
     Row(modifier = modifier,
         verticalAlignment = Alignment.CenterVertically) {
-        val clockFormat = SimpleDateFormat("HH:mm", Locale.ENGLISH)
 
         val delta = remember {
             mutableStateOf(getDeltaToNow(time))
         }
 
-        LaunchedEffect(true) {
+        LaunchedEffect(time) {
             while (true) {
                 delta.value = getDeltaToNow(time)
                 delay(1000)
@@ -186,7 +177,7 @@ fun LessonClockTime(
         }
 
         Text(
-            text = clockFormat.format(time),
+            text = time.format(DateTimeFormatter.ofPattern("HH:mm")),
             style = TextStyle(
                 fontSize = 14.sp,
                 fontWeight = FontWeight(400),
