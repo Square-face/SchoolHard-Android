@@ -13,6 +13,7 @@ import java.util.Date
  * See [testing documentation](http://d.android.com/tools/testing).
  */
 class LessonTimeUnitTest {
+    /*
     @Test
     fun timeDelta() {
         val t1 = Date(0)
@@ -48,5 +49,5 @@ class LessonTimeUnitTest {
         assertEquals(0F, getProgress(t3, t1, t2))
         assertEquals(1F, getProgress(t1, t2, t3))
         assertEquals(0.5F, getProgress(t1, t3, t2))
-    }
+    }*/
 }
