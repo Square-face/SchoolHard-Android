@@ -2,10 +2,11 @@ package com.example.schoolhard.API
 
 import android.util.Log
 import okhttp3.Response
-import org.json.JSONObject
+import okhttp3.ResponseBody
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.Date
+import java.time.LocalTime
 
 enum class userType{
     Student, Parent, Teacher
@@ -25,14 +26,17 @@ class Student(
 ): User(userType = userType.Student, username = username, password = password, school = school)
 
 class Occasion(
+    val lesson: Lesson,
     val week: Int,
     val weekDay: DayOfWeek,
     val place: String,
     val teacher: String,
-    val startTime: LocalDateTime,
-    val endTime: LocalDateTime,
+    val date: LocalDate,
+    val startTime: LocalTime,
+    val endTime: LocalTime,
 )
 class Lesson(
+    val fullName: String,
     val name: String,
     val id: Int,
     val externalId: String,
@@ -60,12 +64,12 @@ class Filter(
 open class APIResponse(
     val type: APIResponseType,
     open val response: Response?,
-    open val body: JSONObject?,
+    open val body: String?,
 )
 
 class SuccessfulAPIResponse(
     override val response: Response,
-    override val body: JSONObject,
+    override val body: String,
 ): APIResponse(APIResponseType.Success, response, body)
 
 class SuccessfulLessonResponse(
@@ -76,7 +80,7 @@ class FailedAPIResponse(
     val reason: APIResponseFailureReason,
     val message: String,
     response: Response?,
-    body: JSONObject?
+    body: String?
 ): APIResponse(APIResponseType.Failed, response, body)
 
 open class API() {
