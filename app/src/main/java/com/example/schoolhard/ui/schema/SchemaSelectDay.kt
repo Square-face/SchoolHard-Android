@@ -31,17 +31,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.schoolhard.API.Filter
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 import java.time.temporal.IsoFields
 
-val startOfDay = LocalTime.of(0, 0)
-
 @Composable
-fun DayInfo(modifier: Modifier = Modifier, update: (Filter) -> Unit){
+fun DayInfo(modifier: Modifier = Modifier, update: (LocalDate) -> Unit){
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -56,7 +52,7 @@ fun DayInfo(modifier: Modifier = Modifier, update: (Filter) -> Unit){
 }
 
 @Composable
-fun DayOfWeekSelect(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (Filter) -> Unit){
+fun DayOfWeekSelect(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (LocalDate) -> Unit){
     Row(
         modifier = modifier
             .fillMaxWidth(),
@@ -71,7 +67,7 @@ fun DayOfWeekSelect(modifier: Modifier = Modifier, day: MutableState<LocalDate>,
 }
 
 @Composable
-fun DateAndWeek(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (Filter) -> Unit){
+fun DateAndWeek(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (LocalDate) -> Unit){
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
@@ -90,7 +86,7 @@ fun DateAndWeek(modifier: Modifier = Modifier, day: MutableState<LocalDate>, upd
 }
 
 @Composable
-fun WeekDay(modifier: Modifier = Modifier, day: MutableState<LocalDate>, text: String, value: Int, update: (Filter) -> Unit){
+fun WeekDay(modifier: Modifier = Modifier, day: MutableState<LocalDate>, text: String, value: Int, update: (LocalDate) -> Unit){
     Button(
         modifier = modifier
             .defaultMinSize(1.dp, 1.dp),
@@ -101,12 +97,7 @@ fun WeekDay(modifier: Modifier = Modifier, day: MutableState<LocalDate>, text: S
         shape = RoundedCornerShape(0.5f),
         onClick = {
             day.value = day.value.with(ChronoField.DAY_OF_WEEK, value.toLong())
-            val filter = Filter(
-                day.value.atTime(startOfDay),
-                day.value.plusDays(1L).atTime(startOfDay),
-                10
-            )
-            update(filter)
+            update(day.value)
         }) {
         Column(horizontalAlignment = Alignment.CenterHorizontally){
 
@@ -129,7 +120,7 @@ fun WeekDay(modifier: Modifier = Modifier, day: MutableState<LocalDate>, text: S
 }
 
 @Composable
-fun Week(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (Filter) -> Unit){
+fun Week(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (LocalDate) -> Unit){
     Row(
         verticalAlignment = Alignment.Top,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -144,12 +135,7 @@ fun Week(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (F
             shape = RoundedCornerShape(0.5f),
             onClick = {
                 day.value = day.value.with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, day.value.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)-1L)
-                val filter = Filter(
-                    day.value.atTime(startOfDay),
-                    day.value.plusDays(1L).atTime(startOfDay),
-                    10
-                )
-                update(filter)
+                update(day.value)
             }
         ) {
             Icon(modifier = Modifier.padding(0.dp).height(12.dp), imageVector = Icons.Filled.ArrowBack, contentDescription = "Previous", tint = MaterialTheme.colorScheme.onBackground)
@@ -173,12 +159,7 @@ fun Week(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (F
             shape = RoundedCornerShape(0.5f),
             onClick = {
                 day.value = day.value.with(IsoFields.WEEK_OF_WEEK_BASED_YEAR, day.value.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)+1L)
-                val filter = Filter(
-                    day.value.atTime(startOfDay),
-                    day.value.plusDays(1L).atTime(startOfDay),
-                    10
-                )
-                update(filter)
+                update(day.value)
             }
         ) {
             Icon(modifier = Modifier.padding(0.dp).height(12.dp), imageVector = Icons.Filled.ArrowForward, contentDescription = "Next", tint = MaterialTheme.colorScheme.onBackground)
