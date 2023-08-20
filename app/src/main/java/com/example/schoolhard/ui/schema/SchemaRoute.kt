@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,7 +31,10 @@ fun SchemaRoute(modifier: Modifier = Modifier, api: API, database: Database) {
             .padding(start = 40.dp, top = 75.dp, end = 40.dp)
     ) {
         val lessons = remember { mutableStateOf<List<Occasion>>(listOf()) }
-        database.updateSchemaIfEmpty(api)
+
+        LaunchedEffect(key1 = true) {
+            database.updateSchemaIfEmpty(api)
+        }
 
         DayInfo(update = { date: LocalDate -> updateSchemaContent(database, date, lessons) })
         Schema(lessons = lessons)

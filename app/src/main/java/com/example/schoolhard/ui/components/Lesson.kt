@@ -102,7 +102,7 @@ fun LessonInfo(
         verticalArrangement = Arrangement.Top
     ) {
         Text(
-            modifier=Modifier.fillMaxWidth(0.7f),
+            modifier=Modifier.fillMaxWidth(0.65f),
             text = title,
             style = TextStyle(
                 fontSize = 14.sp,

@@ -2,31 +2,49 @@ package com.example.schoolhard.API
 
 import android.util.Log
 import okhttp3.Response
-import okhttp3.ResponseBody
+import java.io.InputStream
+import java.io.OutputStream
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-enum class userType{
+enum class UserType{
     Student, Parent, Teacher
 }
 
+open class Organization(
+    val name: String,
+    val className: String,
+    val id: Int,
+    val userId: Int,
+)
+
 open class User(
     val username: String,
-    val password: String,
-    val school: String,
-    val userType: userType
+    val appKey: String,
+    val userId: Int,
+    val userType: UserType,
+    val organizations: List<Organization>,
 )
 
 class Student(
     username: String,
-    password: String,
-    school: String
-): User(userType = userType.Student, username = username, password = password, school = school)
+    appKey: String,
+    userId: Int,
+    organizations: List<Organization>,
+): User(
+    userType = UserType.Student,
+    username = username,
+    appKey = appKey,
+    userId = userId,
+    organizations = organizations,
+)
 
 class Occasion(
-    val lesson: Lesson,
+    val userid: Int,
+    val orgId: Int,
+    val subject: Subject,
     val week: Int,
     val weekDay: DayOfWeek,
     val place: String,
@@ -35,7 +53,8 @@ class Occasion(
     val startTime: LocalTime,
     val endTime: LocalTime,
 )
-class Lesson(
+
+class Subject(
     val fullName: String,
     val name: String,
     val id: Int,
@@ -83,12 +102,24 @@ class FailedAPIResponse(
     body: String?
 ): APIResponse(APIResponseType.Failed, response, body)
 
-open class API() {
+open class API {
     var status = APIStatus()
+    var userId: Int = 0
+    var orgId: Int = 0
+
     open fun login(
-        user: User,
+        identification: String,
+        password: String,
+        school: String,
+        type: UserType,
         failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("API", response.message)},
         successCallback: (SuccessfulAPIResponse)->(Unit),
+    ){}
+
+    open fun loginSaved(
+        user: User,
+        failureCallback: (FailedAPIResponse) -> Unit = {response -> Log.e("API", response.message)},
+        successCallback: (SuccessfulAPIResponse) -> Unit
     ){}
 
     open fun logout(

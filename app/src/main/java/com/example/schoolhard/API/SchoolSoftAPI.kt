@@ -14,13 +14,11 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 import java.time.temporal.IsoFields
 import java.util.Date
-import java.util.Dictionary
 import java.util.Locale
 
 const val BASE_URL = "https://sms.schoolsoft.se"
@@ -35,10 +33,10 @@ class SuccessfulTokenResponse(
 ): APIResponse(APIResponseType.Success, null, null)
 
 class SchoolSoftAPI:API() {
+
     private var appKey: String? = null
     private var token: String? = null
     private var tokenExpiry: Long? = null
-    private var orgId = 1 // TODO: extract org_id from api
     private val client = OkHttpClient()
     private var schoolUrl: String? = null
 
@@ -161,7 +159,9 @@ class SchoolSoftAPI:API() {
     private fun getOccasion(event: JSONObject, week: Int): Occasion{
         val dayOfWeek = DayOfWeek.of(event.getInt("dayId")+1)
         return Occasion(
-            Lesson(
+            userId,
+            orgId,
+            Subject(
                 event.getString("subjectName"),
                 event.getString("subjectName").split(" - ").subList(1, event.getString("subjectName").split(" - ").size).joinToString(" "),
                 event.getInt("id"),
@@ -211,17 +211,20 @@ class SchoolSoftAPI:API() {
     }
 
     override fun login(
-        user: User,
+        identification: String,
+        password: String,
+        school: String,
+        type: UserType,
         failureCallback: (FailedAPIResponse) -> Unit,
         successCallback: (SuccessfulAPIResponse) -> Unit
     ) {
-        schoolUrl = "$BASE_URL/${user.school}"
+        schoolUrl = "$BASE_URL/$school"
 
         val body = FormBody.Builder()
-            .add("identification", user.username)
-            .add("verification", user.password)
+            .add("identification", identification)
+            .add("verification", password)
             .add("logintype", "4")
-            .add("usertype", (user.userType.ordinal + 1).toString())
+            .add("usertype", (type.ordinal + 1).toString())
             .build()
 
         val request = Request.Builder()
@@ -314,6 +317,7 @@ class SchoolSoftAPI:API() {
 
         // if token has at least 10 minutes of lifetime left
         // do nothing and return already stored token
+        Log.v("SchoolSoftAPI - SmartToken", "Saved token is still valid")
         successCallback(
             SuccessfulTokenResponse(
                 token!!,

@@ -56,7 +56,7 @@ fun getDeltaString(t: Long): String{
     if (hours != 0){
         result += "$hours h "
     }
-    if (minutes != 0){
+    if (minutes != 0 && days == 0){
         result += "$minutes min "
     }
 

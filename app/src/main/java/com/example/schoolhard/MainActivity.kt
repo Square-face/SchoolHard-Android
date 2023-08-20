@@ -8,6 +8,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.view.WindowCompat
 import com.example.schoolhard.API.SchoolSoftAPI
 import com.example.schoolhard.API.Student
+import com.example.schoolhard.API.UserType
 import com.example.schoolhard.database.Database
 import com.example.schoolhard.ui.SchoolHardApp
 
@@ -21,10 +22,7 @@ class MainActivity : ComponentActivity() {
             val api = SchoolSoftAPI()
             val database = Database(this, null)
 
-            api.login(Student(
-                "22linmic",
-                "XAX7UUhzA@rHXCttfXPB",
-                "minervagymnasium")){}
+
 
             SchoolHardApp(widthSizeClass, api, database)
         }
