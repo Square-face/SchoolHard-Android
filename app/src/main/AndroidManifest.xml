@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
@@ -13,6 +14,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.SchoolHard"
         tools:targetApi="31">
+        <activity
+            android:name=".ui.LoginPage"
+            android:exported="false"
+            android:label="@string/title_activity_login_page"
+            android:theme="@style/Theme.SchoolHard" />
         <activity
             android:name=".ui.NavDrawer"
             android:exported="false"
