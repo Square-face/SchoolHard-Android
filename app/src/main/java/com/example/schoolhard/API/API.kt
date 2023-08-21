@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 
 enum class UserType{
-    Student, Parent, Teacher
+    Parent, Student, Teacher
 }
 
 open class Organization(
@@ -104,8 +104,8 @@ class FailedAPIResponse(
 
 open class API {
     var status = APIStatus()
-    var userId: Int = 0
-    var orgId: Int = 0
+    var userId: Int = 1
+    var orgId: Int = 1
 
     open fun login(
         identification: String,

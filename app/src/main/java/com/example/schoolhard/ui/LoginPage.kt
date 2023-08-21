@@ -143,12 +143,16 @@ fun LoginForm(modifier: Modifier = Modifier, logins: SharedPreferences) {
             val failToast = Toast.makeText(localContext, "Incorrect login information", Toast.LENGTH_SHORT)
 
             val api = SchoolSoftAPI()
+
+            Log.v("UI", "attempting login with username: \"$username\", password: \"$password\", school:\"$school\"")
             api.login(
                 identification = username,
                 password = password,
                 school = school,
                 UserType.Student,
-                {_ ->  failToast.show()}
+                {response ->  response.body?.let { Log.v("UI", it) }
+                    failToast.show()}
+
             ){
                 val index = logins.getInt("count", 0)+1
                 val edit = logins.edit()

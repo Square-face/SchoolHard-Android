@@ -34,7 +34,8 @@ class SuccessfulTokenResponse(
 
 class SchoolSoftAPI:API() {
 
-    private var appKey: String? = null
+
+    var appKey: String? = null
     private var token: String? = null
     private var tokenExpiry: Long? = null
     private val client = OkHttpClient()
@@ -224,7 +225,7 @@ class SchoolSoftAPI:API() {
             .add("identification", identification)
             .add("verification", password)
             .add("logintype", "4")
-            .add("usertype", (type.ordinal + 1).toString())
+            .add("usertype", (type.ordinal).toString())
             .build()
 
         val request = Request.Builder()
@@ -234,6 +235,7 @@ class SchoolSoftAPI:API() {
 
         execute(request,
             failureCallback) {
+            Log.d("SchoolSoftAPI - Login", it.body)
             val body = JSONObject(it.body)
 
             // get appKey
@@ -245,6 +247,14 @@ class SchoolSoftAPI:API() {
             status.loggedin = true
             successCallback(it)
         }
+    }
+
+    fun loginWithAppKey(newAppKey: String, school: String) {
+        Log.i("SchoolHardAPI - AppKeyLogin", "Logging in to ${school.trim()} with $newAppKey")
+        appKey = newAppKey
+        status.loggedin = true
+        status.connected = true
+        schoolUrl = "$BASE_URL/${school.trim()}"
     }
 
     fun getToken(
@@ -278,6 +288,7 @@ class SchoolSoftAPI:API() {
             request,
             failureCallback,
         ){
+            Log.d("SchoolSoftAPI - Token", it.body)
             val body = JSONObject(it.body)
 
             // get token
