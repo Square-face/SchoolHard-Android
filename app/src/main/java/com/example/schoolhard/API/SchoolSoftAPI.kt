@@ -1,5 +1,6 @@
 package com.example.schoolhard.API
 
+import android.nfc.FormatException
 import android.util.Log
 import com.example.schoolhard.utils.MillisInMin
 import okhttp3.Call
@@ -26,6 +27,28 @@ const val app_version = "2.3.2"
 const val app_os = "android"
 const val device_id = ""
 val timeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.S")
+
+class SchoolSoftSchool(name: String, url: String, loginMethods: LoginMethods): School(name, url, loginMethods){
+    companion object {
+        private fun parseLoginMethod(loginMethod: String): List<Int>{
+            if (!loginMethod.contains(",")){return listOf()}
+            return loginMethod.split(",").map { it.toInt() }
+        }
+        fun parse(school: JSONObject): School {
+            Log.d("SchoolSoftAPI - SchoolParse", "SchoolObject: $school")
+            return School(
+                school.getString("name"),
+                school.getString("url"),
+                LoginMethods(
+                    parseLoginMethod(school.getString("parentLoginMethods")),
+                    parseLoginMethod(school.getString("studentLoginMethods")),
+                    parseLoginMethod(school.getString("teacherLoginMethods")),
+                )
+            )
+        }
+    }
+
+}
 
 class SuccessfulTokenResponse(
     val token: String,
@@ -75,6 +98,8 @@ class SchoolSoftAPI:API() {
                     return
                 }
 
+                Log.v("SchoolSoftAPI", "ResponseBody: ${apiResponse.body}")
+
                 successCallback(apiResponse as SuccessfulAPIResponse)
             }
         })
@@ -102,7 +127,11 @@ class SchoolSoftAPI:API() {
     private fun getExpiryFromString(expiry: String): Long{
         val format = SimpleDateFormat("yyyy-mm-dd hh:MM:ss", Locale.ENGLISH)
         val date = format.parse(expiry)
-        return date.time
+        if (date != null) {
+            return date.time
+        }
+
+        throw FormatException("Invalid expiration string formatting")
     }
 
     private fun buildRequest(url: String, token: String): Request {
@@ -214,12 +243,12 @@ class SchoolSoftAPI:API() {
     override fun login(
         identification: String,
         password: String,
-        school: String,
+        school: School,
         type: UserType,
         failureCallback: (FailedAPIResponse) -> Unit,
         successCallback: (SuccessfulAPIResponse) -> Unit
     ) {
-        schoolUrl = "$BASE_URL/$school"
+        schoolUrl = school.url
 
         val body = FormBody.Builder()
             .add("identification", identification)
@@ -229,17 +258,17 @@ class SchoolSoftAPI:API() {
             .build()
 
         val request = Request.Builder()
-            .url("$schoolUrl/rest/app/login")
+            .url("${schoolUrl}rest/app/login")
             .post(body)
             .build()
 
         execute(request,
             failureCallback) {
             Log.d("SchoolSoftAPI - Login", it.body)
-            val body = JSONObject(it.body)
+            val responseBody = JSONObject(it.body)
 
             // get appKey
-            appKey = body.getString("appKey")
+            appKey = responseBody.getString("appKey")
             Log.v("SchoolSoftAPI - Login", "AppKey: $appKey")
 
             // run callback
@@ -249,12 +278,15 @@ class SchoolSoftAPI:API() {
         }
     }
 
-    fun loginWithAppKey(newAppKey: String, school: String) {
-        Log.i("SchoolHardAPI - AppKeyLogin", "Logging in to ${school.trim()} with $newAppKey")
+    fun setSchoolUrl(url: String) {
+        schoolUrl = url
+    }
+
+    fun loginWithAppKey(newAppKey: String) {
+        Log.i("SchoolHardAPI - AppKeyLogin", "Logging in with $newAppKey")
         appKey = newAppKey
         status.loggedin = true
         status.connected = true
-        schoolUrl = "$BASE_URL/${school.trim()}"
     }
 
     fun getToken(
@@ -276,7 +308,7 @@ class SchoolSoftAPI:API() {
 
         // get token request
         val request = Request.Builder()
-            .url("$schoolUrl/rest/app/token")
+            .url("${schoolUrl}rest/app/token")
             .addHeader("appversion", "2.3.2")
             .addHeader("appos", "android")
             .addHeader("appkey", appKey!!)
@@ -352,9 +384,34 @@ class SchoolSoftAPI:API() {
         failureCallback: (FailedAPIResponse) -> Unit,
         successCallback: (SuccessfulLessonResponse) -> Unit
     ) {smartToken(failureCallback){token ->
-        val request = buildRequest("$schoolUrl/api/lessons/student/$orgId", token.token)
+        val request = buildRequest("${schoolUrl}api/lessons/student/$orgId", token.token)
         execute(request, failureCallback){
             parseLessons(it, filter, successCallback)
         }
     }}
+
+    override fun schools(
+        failureCallback: (FailedAPIResponse) -> Unit,
+        successCallback: (SuccessfulSchoolsResponse) -> Unit
+    ) {
+        val request = Request.Builder().url("$BASE_URL/rest/app/schoollist/prod").build()
+        execute(request, failureCallback) {
+            val body = JSONArray(it.body)
+            val schools = mutableListOf<School>()
+
+            for (i in 0 until body.length()) {
+                val school = body[i] as JSONObject
+
+                schools.add(SchoolSoftSchool.parse(school))
+            }
+
+            Log.v("SchoolSoftAPI - Schools", "returned with ${schools.size} schools")
+
+            successCallback(
+                SuccessfulSchoolsResponse(
+                    schools
+                )
+            )
+        }
+    }
 }

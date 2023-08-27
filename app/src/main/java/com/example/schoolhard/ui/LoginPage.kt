@@ -1,52 +1,65 @@
 package com.example.schoolhard.ui
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import android.widget.Toast
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.PopupProperties
+import com.example.schoolhard.API.School
 import com.example.schoolhard.API.SchoolSoftAPI
 import com.example.schoolhard.API.UserType
-import com.example.schoolhard.ui.ui.theme.SchoolHardTheme
+import com.example.schoolhard.ui.theme.SchoolHardTheme
 
 @Composable
-fun LoginPage(modifier: Modifier = Modifier, logins: SharedPreferences) {
+fun LoginPage(modifier: Modifier = Modifier, logins: SharedPreferences, index: MutableState<Int>) {
     SchoolHardTheme {
         Column(modifier = modifier
             .fillMaxWidth()
@@ -55,7 +68,7 @@ fun LoginPage(modifier: Modifier = Modifier, logins: SharedPreferences) {
             .background(MaterialTheme.colorScheme.background)
         ) {
             NavBar()
-            Content(logins = logins)
+            Content(logins = logins, index = index)
         }
     }
 }
@@ -81,38 +94,28 @@ fun NavBar(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun Content(modifier: Modifier = Modifier, logins: SharedPreferences) {
+fun Content(modifier: Modifier = Modifier, logins: SharedPreferences, index: MutableState<Int>) {
     Box(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
-        LoginForm(logins = logins)
+        LoginForm(logins = logins, index = index)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginForm(modifier: Modifier = Modifier, logins: SharedPreferences) {
-    Column {
-        var school by rememberSaveable { mutableStateOf("") }
+fun LoginForm(modifier: Modifier = Modifier, logins: SharedPreferences, index: MutableState<Int>) {
+    Column(modifier = modifier) {
+        val school = remember { mutableStateOf<School?>(null) }
         var username by rememberSaveable { mutableStateOf("") }
         var password by rememberSaveable { mutableStateOf("") }
 
         val localContext = LocalContext.current
 
-        TextField(
-            value = school,
-            onValueChange = {school = it},
-            label = { Text("School") },
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                autoCorrect = true,
-                capitalization = KeyboardCapitalization.None,
-                imeAction = ImeAction.Next,
-                ),
-            singleLine = true,
-        )
+        SchoolSelect(school = school)
 
         TextField(
             value = username,
@@ -144,29 +147,103 @@ fun LoginForm(modifier: Modifier = Modifier, logins: SharedPreferences) {
 
             val api = SchoolSoftAPI()
 
-            Log.v("UI", "attempting login with username: \"$username\", password: \"$password\", school:\"$school\"")
+            Log.v("UI", "attempting login with username: \"$username\", password: \"$password\", school:\"${school.value!!.url}\"")
             api.login(
                 identification = username,
                 password = password,
-                school = school,
+                school = school.value!!,
                 UserType.Student,
                 {response ->  response.body?.let { Log.v("UI", it) }
                     failToast.show()}
 
             ){
-                val index = logins.getInt("count", 0)+1
+                val newIndex = logins.getInt("count", 0)+1
                 val edit = logins.edit()
                 edit.putString("${index}appKey", api.appKey!!)
-                edit.putString("${index}school", school.trim())
-                edit.putInt("count", index)
-                edit.putInt("index", index)
+                edit.putString("${index}url", school.value!!.url.trim())
+                edit.putInt("count", newIndex)
+                edit.putInt("index", newIndex)
                 edit.apply()
+
+                index.value = newIndex
             }
         }) {
             Text(text = "Login")
         }
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SchoolSelect(modifier: Modifier = Modifier, school: MutableState<School?>) {
+    var schools by remember { mutableStateOf(mutableListOf<School>()) }
+    var isSearching by remember { mutableStateOf(false) }
+    var query by remember { mutableStateOf("") }
+    var isOpen by remember { mutableStateOf(false) }
+    var isLoaded by remember { mutableStateOf(false) }
+    val focusSearch = remember { FocusRequester() }
+    var filteredSchools by remember { mutableStateOf(schools.toList()) }
+
+
+    LaunchedEffect(true) {
+        SchoolSoftAPI().schools {
+            isLoaded = true
+            schools = it.schools.toMutableList()
+            Log.v("UI", "response returned ${schools.size} schools")
+        }
+    }
+
+    Box(modifier=modifier) {
+        TextField(
+            value = if (isSearching) query else school.value?.name ?: (if (!isLoaded) "Loading" else "Not Selected"),
+            onValueChange = {
+                query = it
+                filteredSchools = schools.filter { it.name.lowercase().contains(query.lowercase()) }
+                            },
+            label = {
+                Text(text = "School")
+            },
+            trailingIcon = { Icon(Icons.Outlined.ArrowDropDown, null) },
+            leadingIcon = {
+                IconButton(onClick = { }) {
+                    if (isLoaded) {
+                        Icon(
+                            Icons.Filled.Check,
+                            contentDescription = ""
+                        )
+                    } else {
+                        Icon(
+                            Icons.Filled.Refresh,
+                            contentDescription = ""
+                        )
+                    }
+                }
+            },
+            modifier = Modifier.focusRequester(focusSearch)
+            )
+        DropdownMenu(expanded = isOpen, onDismissRequest = { isOpen = false }, properties = PopupProperties(focusable = false)) {
+
+            Log.v("UI", "Filtered schools down to ${filteredSchools.size}")
+            if (filteredSchools.size < 10) {
+                isOpen = true
+                filteredSchools.forEach {
+                    DropdownMenuItem(text = { Text(text = it.name) }, onClick = { school.value = it; focusSearch.freeFocus(); isSearching = false; isOpen = false;})
+                }
+            }
+        }
+        Spacer(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color.Transparent)
+                .padding(10.dp)
+                .clickable(
+                    onClick = { isSearching = true; isOpen = true; focusSearch.requestFocus() }
+                )
+        )
+    }
+
+}
+
 @Preview(showBackground = true)
 @Composable
 fun NavBarPreview() {

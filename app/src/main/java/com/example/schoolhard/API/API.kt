@@ -2,8 +2,6 @@ package com.example.schoolhard.API
 
 import android.util.Log
 import okhttp3.Response
-import java.io.InputStream
-import java.io.OutputStream
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -11,6 +9,19 @@ import java.time.LocalTime
 
 enum class UserType{
     Parent, Student, Teacher
+}
+
+open class LoginMethods(
+    val parents: List<Int>,
+    val students: List<Int>,
+    val teacher: List<Int>,
+)
+
+open class School(
+    val name: String,
+    val url: String,
+    val loginMethods: LoginMethods,
+) {
 }
 
 open class Organization(
@@ -95,6 +106,10 @@ class SuccessfulLessonResponse(
     val lessons: List<Occasion>
 ): APIResponse(APIResponseType.Success, null, null)
 
+class SuccessfulSchoolsResponse(
+    val schools: List<School>
+): APIResponse(APIResponseType.Success, null, null)
+
 class FailedAPIResponse(
     val reason: APIResponseFailureReason,
     val message: String,
@@ -110,9 +125,9 @@ open class API {
     open fun login(
         identification: String,
         password: String,
-        school: String,
+        school: School,
         type: UserType,
-        failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("API", response.message)},
+        failureCallback: (FailedAPIResponse)->(Unit) = { response -> Log.e("API", response.message)},
         successCallback: (SuccessfulAPIResponse)->(Unit),
     ){}
 
@@ -146,6 +161,6 @@ open class API {
 
     open fun schools(
         failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("Request", response.message)},
-        successCallback: (SuccessfulAPIResponse)->(Unit),
+        successCallback: (SuccessfulSchoolsResponse)->(Unit),
     ){}
 }

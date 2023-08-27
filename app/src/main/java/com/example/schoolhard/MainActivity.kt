@@ -1,12 +1,12 @@
 package com.example.schoolhard
 
-import android.content.Context
-import android.content.ContextParams
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.core.view.WindowCompat
 import com.example.schoolhard.API.SchoolSoftAPI
 import com.example.schoolhard.database.Database
@@ -21,16 +21,17 @@ class MainActivity : ComponentActivity() {
         setContent {
 
             val logins = getSharedPreferences("logins", MODE_PRIVATE)
-            val index = logins.getInt("index", -1)
+            val index = remember { mutableStateOf(logins.getInt("index", -1)) }
 
-            if (index == -1) {
-                LoginPage(logins=logins)
+            if (index.value == -1) {
+                LoginPage(logins =logins, index =index)
             } else {
                 val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
                 val api = SchoolSoftAPI()
                 val appKey = logins.getString(index.toString()+"appKey", "nothing")
-                val school = logins.getString(index.toString()+"school", "nothing")
-                api.loginWithAppKey(appKey!!, school!!)
+                val url = logins.getString(index.toString()+"url", "nothing")
+                api.setSchoolUrl(url!!)
+                api.loginWithAppKey(appKey!!)
                 val database = Database(this, null)
                 SchoolHardApp(widthSizeClass, api, database)
             }
