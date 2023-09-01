@@ -8,6 +8,7 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
 import com.example.schoolhard.API.SchoolSoftAPI
 import com.example.schoolhard.data.Logins
@@ -24,18 +25,18 @@ class MainActivity : ComponentActivity() {
 
             // initialize logins manager
             val store = getSharedPreferences("logins", MODE_PRIVATE)
-            val logins by remember{ mutableStateOf(Logins(store)) }
-            val login = logins.login
+            val logins = Logins(store)
+            var login by remember{ mutableStateOf(logins.login) }
 
             if (login == null) {
-                // no current login
-                LoginPage(logins = logins)
+                // no saved login
+                LoginPage(logins = logins, update={login = it})
 
             } else {
                 val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
                 val api = SchoolSoftAPI()
 
-                api.loginWithSaved(login)
+                api.loginWithSaved(login!!)
                 val database = Database(this, null)
                 SchoolHardApp(widthSizeClass, api, database)
             }

@@ -64,10 +64,9 @@ class Login(val uuid: String, private val username: String, val appKey: String, 
  * */
 class Logins(private val store: SharedPreferences) {
     val login get() = getActiveLogin()
-    val logins get() = getLogins()
 
 
-    private fun getLogins(): Set<Login> {
+    fun getLogins(): Set<Login> {
         val uuids = getUUIDs()
         val logins = mutableSetOf<Login>()
 
@@ -124,13 +123,13 @@ class Logins(private val store: SharedPreferences) {
      * @throws LoginExceptions.LoginAlreadyExists If there already exists a login with the same uuid
      * @return The UUID for this login
      * */
-    fun saveLogin(url: String, user: User, setActive: Boolean = false): String{
+    fun saveLogin(url: String, user: User, setActive: Boolean = false): Login{
         val login = Login.fromUser(user, url)
         storeLoginString(login.toJson(), login.uuid)
 
         if (setActive) { setActiveLogin(login) }
 
-        return login.uuid
+        return login
     }
 
 

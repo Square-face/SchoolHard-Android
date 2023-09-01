@@ -55,14 +55,12 @@ import androidx.compose.ui.window.PopupProperties
 import com.example.schoolhard.API.School
 import com.example.schoolhard.API.SchoolSoftAPI
 import com.example.schoolhard.API.UserType
+import com.example.schoolhard.data.Login
 import com.example.schoolhard.data.Logins
 import com.example.schoolhard.ui.theme.SchoolHardTheme
 
 @Composable
-fun LoginPage(modifier: Modifier = Modifier, logins: Logins) {
-    /*Main page for user login
-    *
-    * */
+fun LoginPage(modifier: Modifier = Modifier, logins: Logins, update: (Login) -> (Unit)={}) {
 
     SchoolHardTheme {
         Column(modifier = modifier
@@ -72,7 +70,7 @@ fun LoginPage(modifier: Modifier = Modifier, logins: Logins) {
             .background(MaterialTheme.colorScheme.background)
         ) {
             NavBar()
-            Content(logins = logins)
+            Content(logins = logins, update=update)
         }
     }
 }
@@ -98,20 +96,20 @@ fun NavBar(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun Content(modifier: Modifier = Modifier, logins: Logins) {
+fun Content(modifier: Modifier = Modifier, logins: Logins, update: (Login) -> (Unit)) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
-        LoginForm(logins = logins)
+        LoginForm(logins = logins, update=update)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginForm(modifier: Modifier = Modifier, logins: Logins) {
+fun LoginForm(modifier: Modifier = Modifier, logins: Logins, update: (Login) -> (Unit)) {
     Column(modifier = modifier) {
         val school = remember { mutableStateOf<School?>(null) }
         var username by rememberSaveable { mutableStateOf("") }
@@ -160,7 +158,8 @@ fun LoginForm(modifier: Modifier = Modifier, logins: Logins) {
                 {response ->  response.body?.let { Log.v("UI", it) }
                     failToast.show()}
             ){
-                logins.saveLogin(school.value!!.url, it.user, setActive = true)
+                val login = logins.saveLogin(school.value!!.url, it.user, setActive = true)
+                update(login)
             }
         }) {
             Text(text = "Login")
