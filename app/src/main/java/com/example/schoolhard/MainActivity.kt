@@ -5,10 +5,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
 import com.example.schoolhard.API.SchoolSoftAPI
-import com.example.schoolhard.API.Student
+import com.example.schoolhard.data.Logins
 import com.example.schoolhard.database.Database
+import com.example.schoolhard.ui.LoginPage
 import com.example.schoolhard.ui.SchoolHardApp
 
 class MainActivity : ComponentActivity() {
@@ -17,16 +22,24 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
-            val api = SchoolSoftAPI()
-            val database = Database(this, null)
 
-            api.login(Student(
-                "22linmic",
-                "XAX7UUhzA@rHXCttfXPB",
-                "minervagymnasium")){}
+            // initialize logins manager
+            val store = getSharedPreferences("logins", MODE_PRIVATE)
+            val logins = Logins(store)
+            var login by remember{ mutableStateOf(logins.login) }
 
-            SchoolHardApp(widthSizeClass, api, database)
+            if (login == null) {
+                // no saved login
+                LoginPage(logins = logins, update={login = it})
+
+            } else {
+                val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
+                val api = SchoolSoftAPI()
+
+                api.loginWithSaved(login!!)
+                val database = Database(this, null)
+                SchoolHardApp(widthSizeClass, api, database)
+            }
         }
     }
 }

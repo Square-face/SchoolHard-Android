@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.example.schoolhard.API.API
 import com.example.schoolhard.API.Filter
-import com.example.schoolhard.API.Lesson
+import com.example.schoolhard.API.Subject
 import com.example.schoolhard.API.Occasion
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -16,13 +16,18 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.temporal.ChronoField
 
-class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
-    SQLiteOpenHelper(context, "schema", factory, 2) {
-    override fun onCreate(db: SQLiteDatabase) {
-        Log.i("Database", "creating tables")
+const val SCHEMA = "schema"
+const val SUBJECTS = "subjects"
 
-        val occasionQuery = ("CREATE TABLE occasions ("
+class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
+    SQLiteOpenHelper(context, "schema", factory, 10) {
+    override fun onCreate(db: SQLiteDatabase) {
+        Log.v("Database", "creating tables ($SCHEMA, $SUBJECTS)")
+
+        val occasionQuery = ("CREATE TABLE $SCHEMA ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "userId INT NOT NULL,"
+                + "orgId INT NOT NULL,"
                 + "subjectId INT NOT NULL,"
                 + "week INT NOT NULL,"
                 + "dayOfWeek INT NOT NULL,"
@@ -32,7 +37,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
                 + "place TEXT NOT NULL"
                 + ")")
 
-        val subjectQuery = ("CREATE TABLE subjects ("
+        val subjectQuery = ("CREATE TABLE $SUBJECTS ("
                 + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + "subjectId INT NOT NULL,"
                 + "name TEXT NOT NULL,"
@@ -41,22 +46,33 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
 
         db.execSQL(occasionQuery)
         db.execSQL(subjectQuery)
+        Log.v("Database", "done creating tables")
     }
 
     private fun dropAllTables(db: SQLiteDatabase){
-        Log.w("Database", "Dropping all tables")
-        db.execSQL("DROP TABLE IF EXISTS occasions")
-        db.execSQL("DROP TABLE IF EXISTS subjects")
+        Log.w("Database", "Dropping tables ($SCHEMA, $SUBJECTS)")
+        db.execSQL("DROP TABLE IF EXISTS $SCHEMA")
+        db.execSQL("DROP TABLE IF EXISTS $SUBJECTS")
+        Log.v("Database", "Dropped tables")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, p1: Int, p2: Int) {
+        Log.i("Database - Upgrade", "Database version bump from v$p1 to v$p2")
         dropAllTables(db)
         onCreate(db)
     }
 
-    private fun createSubjectIfNotExist(db: SQLiteDatabase, subject: Lesson) {
-        val cursor = db.rawQuery("SELECT * FROM subjects WHERE subjectId = ${subject.id}", null)
-        if (cursor.count == 1) {cursor.close(); return}
+    private fun createSubjectIfNotExist(db: SQLiteDatabase, subject: Subject) {
+        Log.d("Database - createSubjectIfNotExist", "${subject.id} - ${subject.name}")
+
+        val cursor = db.rawQuery("SELECT * FROM $SUBJECTS WHERE subjectId = ${subject.id}", null)
+        if (cursor.count == 1) {
+            Log.d("Database - createSubjectIfNotExist", "Subject ${subject.id} already exists")
+            cursor.close()
+            return}
+        cursor.close()
+
+        Log.v("Database - createSubjectIfNotExist", "Creating subject ${subject.id}")
 
         val values = ContentValues()
         values.put("subjectId", subject.id)
@@ -65,19 +81,23 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         db.insert("subjects", null, values)
     }
 
-    private fun updateSchema(api: API) {
-        Log.i("Database - UpdateSchema", "Updating...")
+    private fun updateSchema(api: API, finishedCallback: ()->Unit = {}) {
+        Log.i("Database - UpdateSchema", "Updating schema")
+        val db = this.writableDatabase
+        if (db.isDbLockedByCurrentThread) {
+            Log.w("Database - UpdateSchema", "Database looked, exiting")
+            return
+        }
+
         api.lessons(Filter(LocalDateTime.MIN, LocalDateTime.MAX, 100000)){response ->
-
-            val db = this.writableDatabase
-            this.dropAllTables(db)
-            this.onCreate(db)
-
             response.lessons.forEach {occasion ->
-                createSubjectIfNotExist(db, occasion.lesson)
+                Log.d("Database - UpdateSchema", "Caching lessonId: ${occasion.subject.id} date: ${occasion.date} startTime: ${occasion.startTime}")
+                createSubjectIfNotExist(db, occasion.subject)
 
                 val values = ContentValues()
-                values.put("subjectId", occasion.lesson.id)
+                values.put("userId", occasion.userid)
+                values.put("orgId", occasion.orgId)
+                values.put("subjectId", occasion.subject.id)
                 values.put("place", occasion.place)
                 values.put("week", occasion.week)
                 values.put("dayOfWeek", occasion.weekDay.value)
@@ -85,24 +105,26 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
                 values.put("startTime", occasion.startTime.getLong(ChronoField.MINUTE_OF_DAY))
                 values.put("endTime", occasion.endTime.getLong(ChronoField.MINUTE_OF_DAY))
 
-                db.insert("occasions", null, values)
+                db.insert(SCHEMA, null, values)
             }
             db.close()
-            Log.i("Database - UpdateSchema", "occasions table populated")
+            Log.v("Database - UpdateSchema", "Finished caching schema to database")
+            finishedCallback()
         }
     }
 
-    fun updateSchemaIfEmpty(api: API): Boolean {
-        val cursor = this.readableDatabase.rawQuery("SELECT * FROM occasions", null)
+    fun updateSchemaIfEmpty(api: API, finishedCallback: (result: Boolean) -> Unit): Boolean {
+        val cursor = this.readableDatabase.rawQuery("SELECT * FROM $SCHEMA WHERE userId=${api.userId}", null)
         val count = cursor.count
         cursor.close()
 
         if (count == 0) {
-            Log.w("Database - SmartReload", "Database is empty")
-            this.updateSchema(api)
+            Log.w("Database - SmartReload", "Schema database is empty")
+            this.updateSchema(api) { finishedCallback(true) }
             return true
         }
-        Log.i("Database - SmartRelaod", "Database was not empty ($count)")
+        Log.i("Database - SmartRelaod", "Schema database is not empty ($count rows)")
+        finishedCallback(false)
         return false
     }
 
@@ -114,9 +136,10 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         toTime: LocalTime? = null, toDate: LocalDate? = null,
         maxCount: Int? = null
     ): List<Occasion> {
+        Log.d("Database - getSchema", "getting schema")
         val db = this.readableDatabase
 
-        var query = "SELECT * FROM occasions WHERE "
+        var query = "SELECT * FROM $SCHEMA WHERE "
         if (minWeek != null) {query += "week >= $minWeek AND "}
         if (maxWeek != null) {query += "week <= $maxWeek AND "}
         if (minDayOfWeek != null) {query += "dayOfWeek >= ${minDayOfWeek.value} AND "}
@@ -126,12 +149,12 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         if (fromTime != null) {query += "startTime >= ${fromTime.getLong(ChronoField.MINUTE_OF_DAY)} AND "}
         if (toTime != null) {query += "endTime <= ${toTime.getLong(ChronoField.MINUTE_OF_DAY)}; "}
 
-        if (query.endsWith("WHERE ")) { query = "SELECT * FROM occasions" }
+        if (query.endsWith("WHERE ")) { query = "SELECT * FROM $SCHEMA" }
         if (query.endsWith(" AND ")) { query = query.dropLast(5)+";" }
-        Log.d("Database - getSchema", "Final query: $query")
+        Log.d("Database - getSchema", "Schema query: $query")
 
         val cursor = db.rawQuery(query, null)
-        Log.v("Database - getSchema", "Query returned with ${cursor.count} rows")
+        Log.d("Database - getSchema", "Query returned with ${cursor.count} rows")
 
         cursor.moveToFirst()
         val results = mutableListOf<Occasion>()
@@ -139,6 +162,8 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         while (!cursor.isAfterLast) {
             results.add(
                 Occasion(
+                    cursor.getInt(cursor.getColumnIndex("userId")),
+                    cursor.getInt(cursor.getColumnIndex("orgId")),
                     getSubject(cursor.getInt(cursor.getColumnIndex("subjectId"))),
                     cursor.getInt(cursor.getColumnIndex("week")),
                     DayOfWeek.of(cursor.getInt(cursor.getColumnIndex("dayOfWeek"))),
@@ -151,25 +176,26 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
             )
             cursor.moveToNext()
         }
-
         cursor.close()
 
         return if (maxCount == null) results else results.take(maxCount)
     }
 
     @SuppressLint("Range")
-    fun getSubject(id: Int): Lesson {
+    fun getSubject(id: Int): Subject {
+        Log.d("Database - getSubject", "Getting subject with id $id")
         val db = this.readableDatabase
-        val cursor = db.rawQuery("SELECT * FROM subjects WHERE subjectId = $id", null)
+        val cursor = db.rawQuery("SELECT * FROM $SUBJECTS WHERE subjectId = $id", null)
         cursor.moveToFirst()
-        val lesson = Lesson(
+        val subject = Subject(
             cursor.getString(cursor.getColumnIndex("name")),
             cursor.getString(cursor.getColumnIndex("name")),
             cursor.getInt(cursor.getColumnIndex("subjectId")),
             "TODO"
         )
         cursor.close()
-        return lesson
+        Log.d("Database - getSubject", "subject id ${subject.id} is ${subject.name}")
+        return subject
     }
 
 }

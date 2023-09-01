@@ -1,5 +1,6 @@
 package com.example.schoolhard.API
 
+import android.nfc.FormatException
 import android.util.Log
 import com.example.schoolhard.utils.MillisInMin
 import okhttp3.Call
@@ -14,13 +15,11 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
 import java.time.temporal.IsoFields
 import java.util.Date
-import java.util.Dictionary
 import java.util.Locale
 
 const val BASE_URL = "https://sms.schoolsoft.se"
@@ -29,16 +28,39 @@ const val app_os = "android"
 const val device_id = ""
 val timeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.S")
 
+class SchoolSoftSchool(name: String, url: String, loginMethods: LoginMethods): School(name, url, loginMethods){
+    companion object {
+        private fun parseLoginMethod(loginMethod: String): List<Int>{
+            if (!loginMethod.contains(",")){return listOf()}
+            return loginMethod.split(",").map { it.toInt() }
+        }
+        fun parse(school: JSONObject): School {
+            Log.d("SchoolSoftAPI - SchoolParse", "SchoolObject: $school")
+            return School(
+                school.getString("name"),
+                school.getString("url"),
+                LoginMethods(
+                    parseLoginMethod(school.getString("parentLoginMethods")),
+                    parseLoginMethod(school.getString("studentLoginMethods")),
+                    parseLoginMethod(school.getString("teacherLoginMethods")),
+                )
+            )
+        }
+    }
+
+}
+
 class SuccessfulTokenResponse(
     val token: String,
     val expiry: Long,
 ): APIResponse(APIResponseType.Success, null, null)
 
 class SchoolSoftAPI:API() {
-    private var appKey: String? = null
+
+
+    var appKey: String? = null
     private var token: String? = null
     private var tokenExpiry: Long? = null
-    private var orgId = 1 // TODO: extract org_id from api
     private val client = OkHttpClient()
     private var schoolUrl: String? = null
 
@@ -76,6 +98,8 @@ class SchoolSoftAPI:API() {
                     return
                 }
 
+                Log.v("SchoolSoftAPI", "ResponseBody: ${apiResponse.body}")
+
                 successCallback(apiResponse as SuccessfulAPIResponse)
             }
         })
@@ -103,7 +127,11 @@ class SchoolSoftAPI:API() {
     private fun getExpiryFromString(expiry: String): Long{
         val format = SimpleDateFormat("yyyy-mm-dd hh:MM:ss", Locale.ENGLISH)
         val date = format.parse(expiry)
-        return date.time
+        if (date != null) {
+            return date.time
+        }
+
+        throw FormatException("Invalid expiration string formatting")
     }
 
     private fun buildRequest(url: String, token: String): Request {
@@ -115,6 +143,10 @@ class SchoolSoftAPI:API() {
             .addHeader("token", token)
             .addHeader("deviceid", device_id)
             .build()
+    }
+
+    private fun getOrgs(array: JSONArray): List<Organization>{
+        TODO("Not Implemented")
     }
 
     private fun jsonArrayToList(jsonArray: JSONArray): List<JSONObject> {
@@ -161,7 +193,9 @@ class SchoolSoftAPI:API() {
     private fun getOccasion(event: JSONObject, week: Int): Occasion{
         val dayOfWeek = DayOfWeek.of(event.getInt("dayId")+1)
         return Occasion(
-            Lesson(
+            userId,
+            orgId,
+            Subject(
                 event.getString("subjectName"),
                 event.getString("subjectName").split(" - ").subList(1, event.getString("subjectName").split(" - ").size).joinToString(" "),
                 event.getInt("id"),
@@ -211,37 +245,67 @@ class SchoolSoftAPI:API() {
     }
 
     override fun login(
-        user: User,
+        identification: String,
+        password: String,
+        school: School,
+        type: UserType,
         failureCallback: (FailedAPIResponse) -> Unit,
-        successCallback: (SuccessfulAPIResponse) -> Unit
+        successCallback: (SuccessfulLoginResponse) -> Unit
     ) {
-        schoolUrl = "$BASE_URL/${user.school}"
+        schoolUrl = school.url
 
         val body = FormBody.Builder()
-            .add("identification", user.username)
-            .add("verification", user.password)
+            .add("identification", identification)
+            .add("verification", password)
             .add("logintype", "4")
-            .add("usertype", (user.userType.ordinal + 1).toString())
+            .add("usertype", (type.ordinal).toString())
             .build()
 
         val request = Request.Builder()
-            .url("$schoolUrl/rest/app/login")
+            .url("${schoolUrl}rest/app/login")
             .post(body)
             .build()
 
         execute(request,
             failureCallback) {
-            val body = JSONObject(it.body)
+            Log.d("SchoolSoftAPI - Login", it.body)
+            val responseBody = JSONObject(it.body)
 
             // get appKey
-            appKey = body.getString("appKey")
+            appKey = responseBody.getString("appKey")
             Log.v("SchoolSoftAPI - Login", "AppKey: $appKey")
 
-            // run callback
+            // update state
             status.connected = true
             status.loggedin = true
-            successCallback(it)
+
+            val user = User(
+                responseBody.getString("username"),
+                appKey!!,
+                responseBody.getInt("userId"),
+                UserType.from(responseBody.getInt("type")),
+                getOrgs(responseBody.getJSONArray("orgs"))
+            )
+
+            successCallback(
+                SuccessfulLoginResponse(
+                    user,
+                    it.response,
+                    it.body
+                )
+            )
         }
+    }
+
+    fun setSchoolUrl(url: String) {
+        schoolUrl = url
+    }
+
+    fun loginWithAppKey(newAppKey: String) {
+        Log.i("SchoolHardAPI - AppKeyLogin", "Logging in with $newAppKey")
+        appKey = newAppKey
+        status.loggedin = true
+        status.connected = true
     }
 
     fun getToken(
@@ -263,7 +327,7 @@ class SchoolSoftAPI:API() {
 
         // get token request
         val request = Request.Builder()
-            .url("$schoolUrl/rest/app/token")
+            .url("${schoolUrl}rest/app/token")
             .addHeader("appversion", "2.3.2")
             .addHeader("appos", "android")
             .addHeader("appkey", appKey!!)
@@ -275,6 +339,7 @@ class SchoolSoftAPI:API() {
             request,
             failureCallback,
         ){
+            Log.d("SchoolSoftAPI - Token", it.body)
             val body = JSONObject(it.body)
 
             // get token
@@ -314,6 +379,7 @@ class SchoolSoftAPI:API() {
 
         // if token has at least 10 minutes of lifetime left
         // do nothing and return already stored token
+        Log.v("SchoolSoftAPI - SmartToken", "Saved token is still valid")
         successCallback(
             SuccessfulTokenResponse(
                 token!!,
@@ -337,9 +403,34 @@ class SchoolSoftAPI:API() {
         failureCallback: (FailedAPIResponse) -> Unit,
         successCallback: (SuccessfulLessonResponse) -> Unit
     ) {smartToken(failureCallback){token ->
-        val request = buildRequest("$schoolUrl/api/lessons/student/$orgId", token.token)
+        val request = buildRequest("${schoolUrl}api/lessons/student/$orgId", token.token)
         execute(request, failureCallback){
             parseLessons(it, filter, successCallback)
         }
     }}
+
+    override fun schools(
+        failureCallback: (FailedAPIResponse) -> Unit,
+        successCallback: (SuccessfulSchoolsResponse) -> Unit
+    ) {
+        val request = Request.Builder().url("$BASE_URL/rest/app/schoollist/prod").build()
+        execute(request, failureCallback) {
+            val body = JSONArray(it.body)
+            val schools = mutableListOf<School>()
+
+            for (i in 0 until body.length()) {
+                val school = body[i] as JSONObject
+
+                schools.add(SchoolSoftSchool.parse(school))
+            }
+
+            Log.v("SchoolSoftAPI - Schools", "returned with ${schools.size} schools")
+
+            successCallback(
+                SuccessfulSchoolsResponse(
+                    schools
+                )
+            )
+        }
+    }
 }

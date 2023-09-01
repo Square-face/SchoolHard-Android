@@ -1,32 +1,75 @@
 package com.example.schoolhard.API
 
 import android.util.Log
+import com.example.schoolhard.data.Login
 import okhttp3.Response
-import okhttp3.ResponseBody
+import java.lang.Exception
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
-enum class userType{
-    Student, Parent, Teacher
+enum class UserType{
+    Parent, Student, Teacher;
+
+    companion object {
+        fun from(ordinal: Int): UserType{
+            when (ordinal) {
+                Parent.ordinal -> return Parent
+                Student.ordinal -> return Student
+                Teacher.ordinal -> return Teacher
+            }
+
+            throw Exception("Ordinal outside range")
+        }
+    }
 }
+
+open class LoginMethods(
+    val parents: List<Int>,
+    val students: List<Int>,
+    val teacher: List<Int>,
+)
+
+open class School(
+    val name: String,
+    val url: String,
+    val loginMethods: LoginMethods,
+) {
+}
+
+open class Organization(
+    val name: String,
+    val className: String,
+    val id: Int,
+    val userId: Int,
+)
 
 open class User(
     val username: String,
-    val password: String,
-    val school: String,
-    val userType: userType
+    val appKey: String,
+    val userId: Int,
+    val userType: UserType,
+    val organizations: List<Organization>,
 )
 
 class Student(
     username: String,
-    password: String,
-    school: String
-): User(userType = userType.Student, username = username, password = password, school = school)
+    appKey: String,
+    userId: Int,
+    organizations: List<Organization>,
+): User(
+    userType = UserType.Student,
+    username = username,
+    appKey = appKey,
+    userId = userId,
+    organizations = organizations,
+)
 
 class Occasion(
-    val lesson: Lesson,
+    val userid: Int,
+    val orgId: Int,
+    val subject: Subject,
     val week: Int,
     val weekDay: DayOfWeek,
     val place: String,
@@ -35,7 +78,8 @@ class Occasion(
     val startTime: LocalTime,
     val endTime: LocalTime,
 )
-class Lesson(
+
+class Subject(
     val fullName: String,
     val name: String,
     val id: Int,
@@ -76,6 +120,16 @@ class SuccessfulLessonResponse(
     val lessons: List<Occasion>
 ): APIResponse(APIResponseType.Success, null, null)
 
+class SuccessfulSchoolsResponse(
+    val schools: List<School>
+): APIResponse(APIResponseType.Success, null, null)
+
+class SuccessfulLoginResponse(
+    val user: User,
+    override val response: Response,
+    override val body: String
+): APIResponse(APIResponseType.Success, response, body)
+
 class FailedAPIResponse(
     val reason: APIResponseFailureReason,
     val message: String,
@@ -83,12 +137,18 @@ class FailedAPIResponse(
     body: String?
 ): APIResponse(APIResponseType.Failed, response, body)
 
-open class API() {
+open class API {
     var status = APIStatus()
+    var userId: Int = 1
+    var orgId: Int = 1
+
     open fun login(
-        user: User,
-        failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("API", response.message)},
-        successCallback: (SuccessfulAPIResponse)->(Unit),
+        identification: String,
+        password: String,
+        school: School,
+        type: UserType,
+        failureCallback: (FailedAPIResponse)->(Unit) = { response -> Log.e("API", response.message)},
+        successCallback: (SuccessfulLoginResponse)->(Unit),
     ){}
 
     open fun logout(
@@ -115,6 +175,8 @@ open class API() {
 
     open fun schools(
         failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("Request", response.message)},
-        successCallback: (SuccessfulAPIResponse)->(Unit),
+        successCallback: (SuccessfulSchoolsResponse)->(Unit),
     ){}
+
+    fun loginWithSaved(login: Login) {}
 }
