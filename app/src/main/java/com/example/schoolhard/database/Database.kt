@@ -81,7 +81,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         db.insert("subjects", null, values)
     }
 
-    private fun updateSchema(api: API) {
+    private fun updateSchema(api: API, finishedCallback: ()->Unit = {}) {
         Log.i("Database - UpdateSchema", "Updating schema")
         val db = this.writableDatabase
         if (db.isDbLockedByCurrentThread) {
@@ -109,20 +109,22 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
             }
             db.close()
             Log.v("Database - UpdateSchema", "Finished caching schema to database")
+            finishedCallback()
         }
     }
 
-    fun updateSchemaIfEmpty(api: API): Boolean {
+    fun updateSchemaIfEmpty(api: API, finishedCallback: (result: Boolean) -> Unit): Boolean {
         val cursor = this.readableDatabase.rawQuery("SELECT * FROM $SCHEMA WHERE userId=${api.userId}", null)
         val count = cursor.count
         cursor.close()
 
         if (count == 0) {
             Log.w("Database - SmartReload", "Schema database is empty")
-            this.updateSchema(api)
+            this.updateSchema(api) { finishedCallback(true) }
             return true
         }
         Log.i("Database - SmartRelaod", "Schema database is not empty ($count rows)")
+        finishedCallback(false)
         return false
     }
 

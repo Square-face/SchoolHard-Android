@@ -33,7 +33,9 @@ fun SchemaRoute(modifier: Modifier = Modifier, api: API, database: Database) {
         val lessons = remember { mutableStateOf<List<Occasion>>(listOf()) }
 
         LaunchedEffect(key1 = true) {
-            database.updateSchemaIfEmpty(api)
+            database.updateSchemaIfEmpty(api) {
+                updateSchemaContent(database, LocalDate.now(), lessons)
+            }
         }
 
         DayInfo(update = { date: LocalDate -> updateSchemaContent(database, date, lessons) })

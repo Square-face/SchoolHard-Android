@@ -1,6 +1,5 @@
 package com.example.schoolhard.ui
 
-import android.content.SharedPreferences
 import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -56,10 +55,15 @@ import androidx.compose.ui.window.PopupProperties
 import com.example.schoolhard.API.School
 import com.example.schoolhard.API.SchoolSoftAPI
 import com.example.schoolhard.API.UserType
+import com.example.schoolhard.data.Logins
 import com.example.schoolhard.ui.theme.SchoolHardTheme
 
 @Composable
-fun LoginPage(modifier: Modifier = Modifier, logins: SharedPreferences, index: MutableState<Int>) {
+fun LoginPage(modifier: Modifier = Modifier, logins: Logins) {
+    /*Main page for user login
+    *
+    * */
+
     SchoolHardTheme {
         Column(modifier = modifier
             .fillMaxWidth()
@@ -68,7 +72,7 @@ fun LoginPage(modifier: Modifier = Modifier, logins: SharedPreferences, index: M
             .background(MaterialTheme.colorScheme.background)
         ) {
             NavBar()
-            Content(logins = logins, index = index)
+            Content(logins = logins)
         }
     }
 }
@@ -94,20 +98,20 @@ fun NavBar(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun Content(modifier: Modifier = Modifier, logins: SharedPreferences, index: MutableState<Int>) {
+fun Content(modifier: Modifier = Modifier, logins: Logins) {
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
-        LoginForm(logins = logins, index = index)
+        LoginForm(logins = logins)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginForm(modifier: Modifier = Modifier, logins: SharedPreferences, index: MutableState<Int>) {
+fun LoginForm(modifier: Modifier = Modifier, logins: Logins) {
     Column(modifier = modifier) {
         val school = remember { mutableStateOf<School?>(null) }
         var username by rememberSaveable { mutableStateOf("") }
@@ -155,17 +159,8 @@ fun LoginForm(modifier: Modifier = Modifier, logins: SharedPreferences, index: M
                 UserType.Student,
                 {response ->  response.body?.let { Log.v("UI", it) }
                     failToast.show()}
-
             ){
-                val newIndex = logins.getInt("count", 0)+1
-                val edit = logins.edit()
-                edit.putString("${index}appKey", api.appKey!!)
-                edit.putString("${index}url", school.value!!.url.trim())
-                edit.putInt("count", newIndex)
-                edit.putInt("index", newIndex)
-                edit.apply()
-
-                index.value = newIndex
+                logins.saveLogin(school.value!!.url, it.user, setActive = true)
             }
         }) {
             Text(text = "Login")

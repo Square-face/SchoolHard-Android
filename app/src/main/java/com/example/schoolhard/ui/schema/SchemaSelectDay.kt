@@ -1,5 +1,6 @@
 package com.example.schoolhard.ui.schema
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,8 +30,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.schoolhard.ui.theme.SchoolHardTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoField
@@ -122,12 +125,19 @@ fun WeekDay(modifier: Modifier = Modifier, day: MutableState<LocalDate>, text: S
 @Composable
 fun Week(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (LocalDate) -> Unit){
     Row(
-        verticalAlignment = Alignment.Top,
+        modifier = modifier
+            .padding(0.dp)
+            .defaultMinSize(1.dp, 1.dp)
+            .height(15.dp)
+        ,
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Button(
             modifier = modifier
-                .defaultMinSize(1.dp, 1.dp),
+                .defaultMinSize(1.dp, 1.dp)
+                .padding(0.dp)
+            ,
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent
             ),
@@ -138,7 +148,7 @@ fun Week(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (L
                 update(day.value)
             }
         ) {
-            Icon(modifier = Modifier.padding(0.dp).height(12.dp), imageVector = Icons.Filled.ArrowBack, contentDescription = "Previous", tint = MaterialTheme.colorScheme.onBackground)
+            Icon(modifier = Modifier.padding(0.dp).height(14.dp).width(14.dp), imageVector = Icons.Filled.ArrowBack, contentDescription = "Previous", tint = MaterialTheme.colorScheme.onBackground)
         }
         Text(
             text = "Week ${day.value.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)}",
@@ -151,7 +161,8 @@ fun Week(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (L
         )
         Button(
             modifier = modifier
-                .defaultMinSize(1.dp, 1.dp),
+                .defaultMinSize(1.dp, 1.dp)
+                .padding(0.dp),
             colors = ButtonDefaults.buttonColors(
                 containerColor = Color.Transparent
             ),
@@ -162,7 +173,26 @@ fun Week(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (L
                 update(day.value)
             }
         ) {
-            Icon(modifier = Modifier.padding(0.dp).height(12.dp), imageVector = Icons.Filled.ArrowForward, contentDescription = "Next", tint = MaterialTheme.colorScheme.onBackground)
+            Icon(modifier = Modifier.padding(0.dp).height(14.dp), imageVector = Icons.Filled.ArrowForward, contentDescription = "Next", tint = MaterialTheme.colorScheme.onBackground)
         }
+    }
+}
+
+@SuppressLint("UnrememberedMutableState")
+@Composable
+@Preview
+fun PreviewWeek(){
+    SchoolHardTheme {
+        Week(day = mutableStateOf(LocalDate.now()), update={})
+    }
+}
+
+
+@SuppressLint("UnrememberedMutableState")
+@Composable
+@Preview
+fun PreviewDays(){
+    SchoolHardTheme {
+        DayOfWeekSelect(day= mutableStateOf(LocalDate.now()), update={})
     }
 }

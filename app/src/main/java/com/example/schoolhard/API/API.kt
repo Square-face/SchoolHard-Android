@@ -1,14 +1,28 @@
 package com.example.schoolhard.API
 
 import android.util.Log
+import com.example.schoolhard.data.Login
 import okhttp3.Response
+import java.lang.Exception
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
 enum class UserType{
-    Parent, Student, Teacher
+    Parent, Student, Teacher;
+
+    companion object {
+        fun from(ordinal: Int): UserType{
+            when (ordinal) {
+                Parent.ordinal -> return Parent
+                Student.ordinal -> return Student
+                Teacher.ordinal -> return Teacher
+            }
+
+            throw Exception("Ordinal outside range")
+        }
+    }
 }
 
 open class LoginMethods(
@@ -110,6 +124,12 @@ class SuccessfulSchoolsResponse(
     val schools: List<School>
 ): APIResponse(APIResponseType.Success, null, null)
 
+class SuccessfulLoginResponse(
+    val user: User,
+    override val response: Response,
+    override val body: String
+): APIResponse(APIResponseType.Success, response, body)
+
 class FailedAPIResponse(
     val reason: APIResponseFailureReason,
     val message: String,
@@ -128,13 +148,7 @@ open class API {
         school: School,
         type: UserType,
         failureCallback: (FailedAPIResponse)->(Unit) = { response -> Log.e("API", response.message)},
-        successCallback: (SuccessfulAPIResponse)->(Unit),
-    ){}
-
-    open fun loginSaved(
-        user: User,
-        failureCallback: (FailedAPIResponse) -> Unit = {response -> Log.e("API", response.message)},
-        successCallback: (SuccessfulAPIResponse) -> Unit
+        successCallback: (SuccessfulLoginResponse)->(Unit),
     ){}
 
     open fun logout(
@@ -163,4 +177,6 @@ open class API {
         failureCallback: (FailedAPIResponse)->(Unit) = {response -> Log.e("Request", response.message)},
         successCallback: (SuccessfulSchoolsResponse)->(Unit),
     ){}
+
+    fun loginWithSaved(login: Login) {}
 }

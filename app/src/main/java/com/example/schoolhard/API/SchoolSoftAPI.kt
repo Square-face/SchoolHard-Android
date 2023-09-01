@@ -145,6 +145,10 @@ class SchoolSoftAPI:API() {
             .build()
     }
 
+    private fun getOrgs(array: JSONArray): List<Organization>{
+        TODO("Not Implemented")
+    }
+
     private fun jsonArrayToList(jsonArray: JSONArray): List<JSONObject> {
         val list = mutableListOf<JSONObject>()
         for (i in 0 until jsonArray.length()) {
@@ -246,7 +250,7 @@ class SchoolSoftAPI:API() {
         school: School,
         type: UserType,
         failureCallback: (FailedAPIResponse) -> Unit,
-        successCallback: (SuccessfulAPIResponse) -> Unit
+        successCallback: (SuccessfulLoginResponse) -> Unit
     ) {
         schoolUrl = school.url
 
@@ -271,10 +275,25 @@ class SchoolSoftAPI:API() {
             appKey = responseBody.getString("appKey")
             Log.v("SchoolSoftAPI - Login", "AppKey: $appKey")
 
-            // run callback
+            // update state
             status.connected = true
             status.loggedin = true
-            successCallback(it)
+
+            val user = User(
+                responseBody.getString("username"),
+                appKey!!,
+                responseBody.getInt("userId"),
+                UserType.from(responseBody.getInt("type")),
+                getOrgs(responseBody.getJSONArray("orgs"))
+            )
+
+            successCallback(
+                SuccessfulLoginResponse(
+                    user,
+                    it.response,
+                    it.body
+                )
+            )
         }
     }
 
