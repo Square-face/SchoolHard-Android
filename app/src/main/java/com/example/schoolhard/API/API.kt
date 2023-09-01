@@ -42,7 +42,6 @@ open class Organization(
     val name: String,
     val className: String,
     val id: Int,
-    val userId: Int,
 )
 
 open class User(
@@ -178,5 +177,5 @@ open class API {
         successCallback: (SuccessfulSchoolsResponse)->(Unit),
     ){}
 
-    fun loginWithSaved(login: Login) {}
+    open fun loginWithSaved(login: Login) {}
 }

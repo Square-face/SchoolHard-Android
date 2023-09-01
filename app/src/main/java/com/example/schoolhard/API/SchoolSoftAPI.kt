@@ -2,6 +2,7 @@ package com.example.schoolhard.API
 
 import android.nfc.FormatException
 import android.util.Log
+import com.example.schoolhard.data.Login
 import com.example.schoolhard.utils.MillisInMin
 import okhttp3.Call
 import okhttp3.Callback
@@ -145,8 +146,19 @@ class SchoolSoftAPI:API() {
             .build()
     }
 
-    private fun getOrgs(array: JSONArray): List<Organization>{
-        TODO("Not Implemented")
+    private fun getOrganizations(array: JSONArray): List<Organization>{
+        val organizations = mutableListOf<Organization>()
+
+        for (i in 0 until array.length()) {
+            val org = array.getJSONObject(i)
+            organizations.add(Organization(
+                org.getString("name"),
+                org.getString("class"),
+                org.getInt("orgId"),
+            ))
+        }
+
+        return organizations
     }
 
     private fun jsonArrayToList(jsonArray: JSONArray): List<JSONObject> {
@@ -244,58 +256,7 @@ class SchoolSoftAPI:API() {
         successCallback(SuccessfulLessonResponse(filteredResults))
     }
 
-    override fun login(
-        identification: String,
-        password: String,
-        school: School,
-        type: UserType,
-        failureCallback: (FailedAPIResponse) -> Unit,
-        successCallback: (SuccessfulLoginResponse) -> Unit
-    ) {
-        schoolUrl = school.url
 
-        val body = FormBody.Builder()
-            .add("identification", identification)
-            .add("verification", password)
-            .add("logintype", "4")
-            .add("usertype", (type.ordinal).toString())
-            .build()
-
-        val request = Request.Builder()
-            .url("${schoolUrl}rest/app/login")
-            .post(body)
-            .build()
-
-        execute(request,
-            failureCallback) {
-            Log.d("SchoolSoftAPI - Login", it.body)
-            val responseBody = JSONObject(it.body)
-
-            // get appKey
-            appKey = responseBody.getString("appKey")
-            Log.v("SchoolSoftAPI - Login", "AppKey: $appKey")
-
-            // update state
-            status.connected = true
-            status.loggedin = true
-
-            val user = User(
-                responseBody.getString("username"),
-                appKey!!,
-                responseBody.getInt("userId"),
-                UserType.from(responseBody.getInt("type")),
-                getOrgs(responseBody.getJSONArray("orgs"))
-            )
-
-            successCallback(
-                SuccessfulLoginResponse(
-                    user,
-                    it.response,
-                    it.body
-                )
-            )
-        }
-    }
 
     fun setSchoolUrl(url: String) {
         schoolUrl = url
@@ -386,6 +347,66 @@ class SchoolSoftAPI:API() {
                 tokenExpiry!!
             )
         )
+    }
+
+    override fun login(
+        identification: String,
+        password: String,
+        school: School,
+        type: UserType,
+        failureCallback: (FailedAPIResponse) -> Unit,
+        successCallback: (SuccessfulLoginResponse) -> Unit
+    ) {
+        schoolUrl = school.url
+
+        val body = FormBody.Builder()
+            .add("identification", identification)
+            .add("verification", password)
+            .add("logintype", "4")
+            .add("usertype", (type.ordinal).toString())
+            .build()
+
+        val request = Request.Builder()
+            .url("${schoolUrl}rest/app/login")
+            .post(body)
+            .build()
+
+        execute(request,
+            failureCallback) {
+            Log.d("SchoolSoftAPI - Login", it.body)
+            val responseBody = JSONObject(it.body)
+
+            // get appKey
+            appKey = responseBody.getString("appKey")
+            Log.v("SchoolSoftAPI - Login", "AppKey: $appKey")
+
+            // update state
+            status.connected = true
+            status.loggedin = true
+
+            val user = User(
+                responseBody.getString("name"),
+                appKey!!,
+                responseBody.getInt("userId"),
+                UserType.from(responseBody.getInt("type")),
+                getOrganizations(responseBody.getJSONArray("orgs"))
+            )
+
+            successCallback(
+                SuccessfulLoginResponse(
+                    user,
+                    it.response,
+                    it.body
+                )
+            )
+        }
+    }
+
+    override fun loginWithSaved(login: Login) {
+        appKey = login.appKey
+        schoolUrl = login.url
+        status.loggedin = true
+        status.connected = true
     }
 
     override fun logout(
