@@ -292,7 +292,7 @@ class Logins(private val store: SharedPreferences) {
         Log.d("Logins - writeString", "Writing to $address data:\n$value")
         val editor = store.edit()
         editor.putString(address, value)
-        editor.apply()
+        editor.commit()
     }
 
 
@@ -309,7 +309,7 @@ class Logins(private val store: SharedPreferences) {
         Log.d("Logins - writeInt", "Writing to $address data:\n$value")
         val editor = store.edit()
         editor.putInt(address, value)
-        editor.apply()
+        editor.commit()
     }
 
 
@@ -326,7 +326,7 @@ class Logins(private val store: SharedPreferences) {
         Log.d("Logins - writeSet", "Writing to $address data:\n$value")
         val editor = store.edit()
         editor.putStringSet(address, value)
-        editor.apply()
+        editor.commit()
     }
 }
 
