@@ -1,5 +1,6 @@
 package com.example.schoolhard
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,7 +14,6 @@ import androidx.core.view.WindowCompat
 import com.example.schoolhard.API.SchoolSoftAPI
 import com.example.schoolhard.data.Logins
 import com.example.schoolhard.database.Database
-import com.example.schoolhard.ui.LoginPage
 import com.example.schoolhard.ui.SchoolHardApp
 
 class MainActivity : ComponentActivity() {
@@ -29,9 +29,7 @@ class MainActivity : ComponentActivity() {
             var login by remember{ mutableStateOf(logins.login) }
 
             if (login == null) {
-                // no saved login
-                LoginPage(logins = logins, update={login = it})
-
+                this.startActivity(Intent(this, Login::class.java))
             } else {
                 val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
                 val api = SchoolSoftAPI()
