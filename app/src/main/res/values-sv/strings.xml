@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SchoolHard</string>
+    <string name="home_title">Hem</string>
+    <string name="schema_title">Schema</string>
+    <string name="title_activity_login">Login</string>
+    <string name="previous">Förra</string>
+    <string name="next">Nästa</string>
+    <string name="notselected">Inte vald</string>
+    <string name="week">Vecka %1$d</string>
+    <string name="loading">Laddar…</string>
+    <string name="search">Sök</string>
+    <string name="username">Användarnamn</string>
+    <string name="password">Lösenord</string>
+    <string name="school">Skola</string>
+    <string name="login">Loga in</string>
+</resources>

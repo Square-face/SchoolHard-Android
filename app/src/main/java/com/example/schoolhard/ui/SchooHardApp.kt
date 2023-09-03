@@ -78,7 +78,7 @@ fun SchoolHardApp(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun rememberSizeAwareDrawerState(isExpandedScreen: Boolean): DrawerState {
-    val drawerState = rememberDrawerState(DrawerValue.Open)
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
 
     return if (!isExpandedScreen) {
         // If we want to allow showing the drawer, we use a real, remembered drawer

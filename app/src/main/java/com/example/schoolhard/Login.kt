@@ -6,7 +6,6 @@ import android.os.Build
 import android.os.Bundle
 import android.os.CombinedVibration
 import android.os.VibrationEffect
-import android.os.Vibrator
 import android.os.VibratorManager
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -56,7 +55,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.getSystemService
 import com.example.schoolhard.API.API
 import com.example.schoolhard.API.School
 import com.example.schoolhard.API.SchoolSoftAPI
@@ -218,7 +216,7 @@ fun SelectSchool(
         if (isLoading) {
             Row {
                 Text(
-                    text = "Loading...",
+                    text = stringResource(id = R.string.loading),
                     color = MaterialTheme.colorScheme.onSecondary
                     )
             }
@@ -257,7 +255,7 @@ fun SchoolSearch(modifier: Modifier = Modifier, query: MutableState<String>, upd
         ) {
             if (!focused.value && query.value == "") {
                 Text(
-                    text = "Search",
+                    text = stringResource(id = R.string.search),
                     style = TextStyle(
                         fontSize = 15.sp,
                         fontWeight = FontWeight(600),
@@ -378,7 +376,7 @@ fun SchoolField(modifier: Modifier = Modifier, school: MutableState<School?>, on
         .clickable { onClick() }
     ) {
         Text(
-            text = "School",
+            text = stringResource(id = R.string.school),
             style = TextStyle(
                 fontSize = 11.sp,
                 fontWeight = FontWeight(600),
@@ -386,7 +384,7 @@ fun SchoolField(modifier: Modifier = Modifier, school: MutableState<School?>, on
             )
         )
         Text(
-            text = school.value?.name ?: "Not selected",
+            text = school.value?.name ?: stringResource(id = R.string.notselected),
             style = TextStyle(
                 fontSize = 15.sp,
                 fontWeight = FontWeight(600),
@@ -429,7 +427,7 @@ fun UsernameField(modifier: Modifier = Modifier, username: MutableState<String>)
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "Username",
+                    text = stringResource(id = R.string.username),
                     style = TextStyle(
                         fontSize = 11.sp,
                         fontWeight = FontWeight(600),
@@ -474,7 +472,7 @@ fun PasswordField(modifier: Modifier = Modifier, password: MutableState<String>)
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "Password",
+                    text = stringResource(id = R.string.password),
                     style = TextStyle(
                         fontSize = 11.sp,
                         fontWeight = FontWeight(600),
@@ -509,7 +507,7 @@ fun LoginButton(modifier: Modifier = Modifier, enabled: Boolean, onClick: () -> 
             ),
         ) {
             Text(
-                text = "Login",
+                text = stringResource(id = R.string.login),
                 style = TextStyle(
                     fontSize = 15.sp,
                     fontWeight = FontWeight(600),

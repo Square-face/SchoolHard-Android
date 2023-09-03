@@ -1,8 +1,30 @@
 <resources>
-    <string name="app_name">SchoolHard</string>
-    <string name="title_activity_nav_drawer">NavDrawer</string>
+    <string name="app_name" translatable="false">SchoolHard</string>
     <string name="home_title">Home</string>
-    <string name="today_title">Today</string>
-    <string name="title_activity_login_page">LoginPage</string>
-    <string name="title_activity_login">Login</string>
+    <string name="schema_title">Schema</string>
+    <string name="title_activity_login" translatable="false">Login</string>
+
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="notselected">Not selected</string>
+
+    <string name="week">Week %1$d</string>
+    <string name="loading">Loading…</string>
+    <string name="search">Search</string>
+
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="school">School</string>
+
+    <string name="login">Login</string>
+
+    <string-array name="days">
+        <item>Måndag</item>
+        <item>Tisdag</item>
+        <item>Onsdag</item>
+        <item>Torsdag</item>
+        <item>Fredag</item>
+        <item>Lördag</item>
+        <item>Söndag</item>
+    </string-array>
 </resources>

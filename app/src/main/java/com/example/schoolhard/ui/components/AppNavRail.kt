@@ -32,7 +32,7 @@ fun AppNavRail(
     NavigationRail(
         header = {
             Icon(
-                painterResource(R.drawable.ic_launcher_foreground),
+                painterResource(R.drawable.schoolhard_logo),
                 null,
                 Modifier.padding(vertical = 12.dp),
                 tint = MaterialTheme.colorScheme.primary
@@ -49,10 +49,10 @@ fun AppNavRail(
             alwaysShowLabel = false
         )
         NavigationRailItem(
-            selected = currentRoute == SchoolHardDestinations.Today_ROUTE,
+            selected = currentRoute == SchoolHardDestinations.SCHEMA_ROUTE,
             onClick = navigateToInterests,
-            icon = { Icon(Icons.Filled.Info, stringResource(R.string.today_title)) },
-            label = { Text(stringResource(R.string.today_title)) },
+            icon = { Icon(Icons.Filled.Info, stringResource(R.string.schema_title)) },
+            label = { Text(stringResource(R.string.schema_title)) },
             alwaysShowLabel = false
         )
         Spacer(Modifier.weight(1f))

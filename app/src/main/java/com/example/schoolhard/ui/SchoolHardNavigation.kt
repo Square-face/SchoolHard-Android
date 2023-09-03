@@ -8,7 +8,7 @@ import androidx.navigation.NavHostController
  */
 object SchoolHardDestinations {
     const val HOME_ROUTE = "home"
-    const val Today_ROUTE = "today"
+    const val SCHEMA_ROUTE = "today"
 }
 
 /**
@@ -31,7 +31,7 @@ class SchoolHardNavigationActions(navController: NavHostController) {
         }
     }
     val navigateToToday: () -> Unit = {
-        navController.navigate(SchoolHardDestinations.Today_ROUTE) {
+        navController.navigate(SchoolHardDestinations.SCHEMA_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }

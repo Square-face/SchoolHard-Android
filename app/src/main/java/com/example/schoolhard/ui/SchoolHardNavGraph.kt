@@ -18,6 +18,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -26,13 +27,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navDeepLink
 import com.example.schoolhard.API.API
+import com.example.schoolhard.R
 import com.example.schoolhard.database.Database
 import com.example.schoolhard.ui.schema.SchemaRoute
 
-const val POST_ID = "postId"
-const val SchoolHard_APP_URI = "https://developer.android.com/jetnews"
 @Composable
 fun SchoolHardNavGraph(
     api: API,
@@ -59,7 +58,7 @@ fun SchoolHardNavGraph(
                 .padding(15.dp, 10.dp, 0.dp, 10.dp))
             Spacer(modifier = Modifier.width(30.dp))
             Text(
-                text = "SchoolHard",
+                text = stringResource(id = R.string.app_name),
                 style = TextStyle(
                     fontSize = 20.sp,
                     fontWeight = FontWeight(600),
@@ -74,16 +73,10 @@ fun SchoolHardNavGraph(
         ) {
             composable(
                 route = SchoolHardDestinations.HOME_ROUTE,
-                deepLinks = listOf(
-                    navDeepLink {
-                        uriPattern =
-                            "$SchoolHard_APP_URI/${SchoolHardDestinations.HOME_ROUTE}?$POST_ID={$POST_ID}"
-                    }
-                )
-            ) { navBackStackEntry ->
+            ) {
                 Text(modifier = Modifier.padding(30.dp), text="Home")
             }
-            composable(SchoolHardDestinations.Today_ROUTE) {
+            composable(SchoolHardDestinations.SCHEMA_ROUTE) {
                 SchemaRoute(api = api, database = database)
             }
         }

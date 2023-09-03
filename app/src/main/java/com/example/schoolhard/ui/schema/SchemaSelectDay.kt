@@ -27,12 +27,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.schoolhard.R
 import com.example.schoolhard.ui.theme.SchoolHardTheme
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -56,16 +59,17 @@ fun DayInfo(modifier: Modifier = Modifier, update: (LocalDate) -> Unit){
 
 @Composable
 fun DayOfWeekSelect(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (LocalDate) -> Unit){
+    val days: Array<String> = stringArrayResource(id = R.array.days)
     Row(
         modifier = modifier
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        WeekDay(day = day, text = "Monday", value = 1, update = update)
-        WeekDay(day = day, text = "Tuesday", value = 2, update = update)
-        WeekDay(day = day, text = "Wednesday", value = 3, update = update)
-        WeekDay(day = day, text = "Thursday", value = 4, update = update)
-        WeekDay(day = day, text = "Friday", value = 5, update = update)
+        WeekDay(day = day, text = days[0], value = 1, update = update)
+        WeekDay(day = day, text = days[1], value = 2, update = update)
+        WeekDay(day = day, text = days[3], value = 3, update = update)
+        WeekDay(day = day, text = days[4], value = 4, update = update)
+        WeekDay(day = day, text = days[5], value = 5, update = update)
     }
 }
 
@@ -148,10 +152,20 @@ fun Week(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (L
                 update(day.value)
             }
         ) {
-            Icon(modifier = Modifier.padding(0.dp).height(14.dp).width(14.dp), imageVector = Icons.Filled.ArrowBack, contentDescription = "Previous", tint = MaterialTheme.colorScheme.onBackground)
+            Icon(
+                modifier = Modifier
+                    .padding(0.dp)
+                    .height(14.dp)
+                    .width(14.dp),
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = stringResource(
+                    id = R.string.previous
+                ),
+                tint = MaterialTheme.colorScheme.onBackground
+            )
         }
         Text(
-            text = "Week ${day.value.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)}",
+            text = stringResource(id = R.string.week, day.value.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)),
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight(600),
@@ -173,7 +187,16 @@ fun Week(modifier: Modifier = Modifier, day: MutableState<LocalDate>, update: (L
                 update(day.value)
             }
         ) {
-            Icon(modifier = Modifier.padding(0.dp).height(14.dp), imageVector = Icons.Filled.ArrowForward, contentDescription = "Next", tint = MaterialTheme.colorScheme.onBackground)
+            Icon(
+                modifier = Modifier
+                    .padding(0.dp)
+                    .height(14.dp),
+                imageVector = Icons.Filled.ArrowForward,
+                contentDescription = stringResource(
+                    id = R.string.next
+                ),
+                tint = MaterialTheme.colorScheme.onBackground
+            )
         }
     }
 }

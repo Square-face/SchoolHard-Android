@@ -47,9 +47,9 @@ fun AppDrawer(
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
         NavigationDrawerItem(
-            label = { Text(stringResource(id = R.string.today_title)) },
+            label = { Text(stringResource(id = R.string.schema_title)) },
             icon = { Icon(Icons.Filled.Info, null) },
-            selected = currentRoute == SchoolHardDestinations.Today_ROUTE,
+            selected = currentRoute == SchoolHardDestinations.SCHEMA_ROUTE,
             onClick = { navigateToToday(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
