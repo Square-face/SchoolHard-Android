@@ -6,27 +6,44 @@ import java.time.LocalTime
 
 /*=== USER ===*/
 
+
+
+/**
+ * User representation.
+ *
+ * @param id This users unique id
+ * @param username The display name for this user
+ * @param school The school this user is logged in to
+ * @param organization The organization this user is in
+ * */
 open class User(
     val id: Int,
-    val school: School,
-    val organizations: List<Organization>,
     val username: String,
-    val key: String,
+    val school: School,
+    val organization: Organization,
 )
 
 
 
+/**
+ * School representation
+ *
+ * @param id Unique id
+ * @param name Name as provided by the api (not modifiable)
+ * @param loginUrl Url used to login with user information
+ * */
 open class School(
     val id: Int,
     val name: String,
-    val url: String,
+    val loginUrl: String,
 )
+
 
 
 
 open class Organization(
-    val id: Int, // always unique
-    val orgId: Int, // schoolsoft id
+    val id: Int,
+    val orgId: Int,
     val user: User,
     val name: String,
 )
