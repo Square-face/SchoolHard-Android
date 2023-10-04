@@ -40,11 +40,11 @@ class Login(val uuid: String, private val username: String, val appKey: String, 
             )
         }
 
-        fun fromUser(user: User, url: String): Login {
+        fun fromUser(user: User, url: String, key: String): Login {
             return Login(
-                user.userId.toString(),
+                user.id.toString(),
                 user.username,
-                user.appKey,
+                key,
                 user.userType,
                 url,
             )
@@ -123,8 +123,8 @@ class Logins(private val store: SharedPreferences) {
      * @throws LoginExceptions.LoginAlreadyExists If there already exists a login with the same uuid
      * @return The UUID for this login
      * */
-    fun saveLogin(url: String, user: User, setActive: Boolean = false): Login{
-        val login = Login.fromUser(user, url)
+    fun saveLogin(url: String, user: User, key: String, setActive: Boolean = false): Login{
+        val login = Login.fromUser(user, url, key)
         storeLoginString(login.toJson(), login.uuid)
 
         if (setActive) { setActiveLogin(login) }

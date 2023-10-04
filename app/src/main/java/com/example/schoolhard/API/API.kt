@@ -10,14 +10,7 @@ package com.example.schoolhard.API
  * */
 
 import android.util.Log
-import com.example.schoolhard.data.Login
-import okhttp3.Response
-import java.lang.Exception
-import java.time.DayOfWeek
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
-
+import com.example.schoolhard.data.Logins
 
 
 /**
@@ -109,10 +102,12 @@ open class API {
     /**
      * Save the currently active login information to disk to allow it to be used later
      *
+     * @param logins Persistent storage manager
      * @param failureCallback Lambda function to run on separate thread if the request fails in any way.
      * @param successCallback Lambda function to run on a separate thread if the request succeeds.
      * */
     open fun saveLogin(
+        logins: Logins,
         failureCallback: (FailedAPIResponse)->(Unit) = { response -> Log.e("API", response.message) },
         successCallback: ( )->(Unit) = {},
     ) {}
@@ -122,10 +117,12 @@ open class API {
     /**
      * Load login configuration from disk
      *
+     * @param logins Persistent storage manager
      * @param failureCallback Lambda function to run on separate thread if the request fails in any way.
      * @param successCallback Lambda function to run on a separate thread if the request succeeds.
      * */
     open fun loadLogin(
+        logins: Logins,
         failureCallback: (FailedAPIResponse)->(Unit) = { response -> Log.e("API", response.message) },
         successCallback: ()->(Unit) = {},
     ) {}
@@ -176,7 +173,7 @@ open class APIResponse(
  *
  * @author Linus Michelsson
  * */
-class FailedAPIResponse(
+data class FailedAPIResponse(
     val reason: APIResponseFailureReason,
     val message: String,
 ): APIResponse(APIResponseType.Failed)
@@ -209,6 +206,11 @@ enum class APIResponseFailureReason{
      * User is not currently logged in
      * */
     NotLoggedIn,
+
+    /**
+     * Login not saved
+     * */
+    LoginNotSaved,
 
     /**
      * Remote error

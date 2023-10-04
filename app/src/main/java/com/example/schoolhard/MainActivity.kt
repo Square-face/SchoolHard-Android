@@ -11,7 +11,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.view.WindowCompat
-import com.example.schoolhard.API.SchoolSoftAPI
+import com.example.schoolhard.API.SchoolSoft.SchoolSoftAPI
 import com.example.schoolhard.data.Logins
 import com.example.schoolhard.database.Database
 import com.example.schoolhard.ui.SchoolHardApp
@@ -26,7 +26,7 @@ class MainActivity : ComponentActivity() {
             // initialize logins manager
             val store = getSharedPreferences("logins", MODE_PRIVATE)
             val logins = Logins(store)
-            var login by remember{ mutableStateOf(logins.login) }
+            val login by remember{ mutableStateOf(logins.login) }
 
             if (login == null) {
                 this.startActivity(Intent(this, Login::class.java))
@@ -34,7 +34,7 @@ class MainActivity : ComponentActivity() {
                 val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
                 val api = SchoolSoftAPI()
 
-                api.loginWithSaved(login!!)
+                api.loadLogin(logins)
                 val database = Database(this, null)
                 SchoolHardApp(widthSizeClass, api, database)
             }

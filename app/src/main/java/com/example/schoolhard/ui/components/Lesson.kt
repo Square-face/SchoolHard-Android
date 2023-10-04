@@ -1,5 +1,6 @@
 package com.example.schoolhard.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,8 +18,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -27,6 +30,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.schoolhard.API.Lesson
 import com.example.schoolhard.utils.getDelta
 import com.example.schoolhard.utils.getDeltaString
 import com.example.schoolhard.utils.getDeltaToNow
@@ -38,43 +42,54 @@ import java.time.format.DateTimeFormatter
 @Composable
 fun Lesson(
     modifier: Modifier = Modifier,
-    startTime: LocalDateTime,
-    endTime: LocalDateTime,
-    title: String,
-    room: String,
-    teacher: String,
+    lesson: Lesson,
 ){
+    Log.d("UI - Lesson", "Drawing lesson ${lesson.occasion.subject.name}")
     val bevel = RoundedCornerShape(8.dp)
+
     Column(modifier = modifier
         .fillMaxWidth()
         .height(80.dp)
         .background(MaterialTheme.colorScheme.secondary, shape = bevel)
         .clip(bevel)
     ) {
-        val progress = remember { mutableStateOf(getProgress(startTime, LocalDateTime.now(), endTime)) }
+        var progress by remember { mutableStateOf(getProgress(
+            lesson.startTime,
+            LocalDateTime.now(),
+            lesson.endTime
+        )) }
 
-        LaunchedEffect(startTime) {
+        LaunchedEffect(lesson) {
             while (true) {
-                progress.value = getProgress(startTime, LocalDateTime.now(), endTime)
+                progress = getProgress(
+                    lesson.startTime,
+                    LocalDateTime.now(),
+                    lesson.endTime
+                )
                 delay(1000)
             }
         }
 
-        ProgressBar(progress = progress.value)
+
+
+        ProgressBar(progress = progress)
         Row(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(start = 8.dp, bottom = 5.dp, end = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            LessonInfo(title = title, room = room, teacher = teacher)
-            LessonTime(startTime=startTime, endTime=endTime)
+            LessonInfo(lesson=lesson)
+            LessonTime(lesson=lesson)
         }
     }
 }
 
 @Composable
-fun ProgressBar(modifier: Modifier = Modifier, progress: Float = 0F){
+fun ProgressBar(
+    modifier: Modifier = Modifier,
+    progress: Float = 0F
+){
     Box(modifier = modifier
         .fillMaxWidth()
         .height(8.dp)
@@ -92,10 +107,8 @@ fun ProgressBar(modifier: Modifier = Modifier, progress: Float = 0F){
 @Composable
 fun LessonInfo(
     modifier: Modifier = Modifier,
-    title: String,
-    room: String,
-    teacher: String,
-    ) {
+    lesson: Lesson
+) {
     Column(
         modifier = modifier
             .fillMaxHeight(),
@@ -103,7 +116,7 @@ fun LessonInfo(
     ) {
         Text(
             modifier=Modifier.fillMaxWidth(0.65f),
-            text = title,
+            text = lesson.occasion.subject.name,
             style = TextStyle(
                 fontSize = 14.sp,
                 fontWeight = FontWeight(600),
@@ -111,7 +124,7 @@ fun LessonInfo(
             )
         )
         Text(
-            text = room,
+            text = lesson.occasion.location.name,
             style = TextStyle(
                 fontSize = 12.sp,
                 fontWeight = FontWeight(500),
@@ -122,15 +135,21 @@ fun LessonInfo(
 }
 
 @Composable
-fun LessonTime(modifier: Modifier = Modifier, startTime: LocalDateTime, endTime: LocalDateTime){
+fun LessonTime(
+    modifier: Modifier = Modifier,
+    lesson: Lesson
+){
     Column(
         modifier = modifier
             .fillMaxHeight(),
         verticalArrangement = Arrangement.SpaceBetween,
         horizontalAlignment = Alignment.End
     ) {
-        LessonClockTime(time=startTime)
-        val delta = getDelta(startTime, endTime)
+
+        LessonClockTime(time = lesson.startTime)
+
+        val delta = getDelta(lesson.startTime, lesson.endTime)
+
         Text(
             text = getDeltaString(delta),
             style = TextStyle(
@@ -139,7 +158,7 @@ fun LessonTime(modifier: Modifier = Modifier, startTime: LocalDateTime, endTime:
                 color = Color(0xFF000000),
             )
         )
-        LessonClockTime(time=endTime)
+        LessonClockTime(time = lesson.endTime)
     }
 }
 

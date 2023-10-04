@@ -3,7 +3,9 @@ package com.example.schoolhard.API
 import java.lang.Exception
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
+import java.util.UUID
 
 /*=== USER ===*/
 
@@ -65,12 +67,12 @@ enum class UserType{
  *
  * @param id Unique id
  * @param name Name as provided by the api (not modifiable)
- * @param loginUrl Url used to login with user information
+ * @param url Url used to login with user information
  * */
 data class School(
     val id: Int,
     val name: String,
-    val loginUrl: String,
+    val url: String,
 )
 
 
@@ -104,14 +106,15 @@ data class Organization(
  *
  * Holds information about an entire subject, i.e Math, English, etc
  *
- * @param id Unique identifier
  * @param subjectId Subject identifier
  * @param name Subject name
+ *
+ * @property id Unique identifier
  */
 data class Subject(
-    val id: Int,
     val subjectId: Int,
     val name: String,
+    val id: UUID,
 )
 
 
@@ -130,7 +133,7 @@ data class Subject(
  * @param dayOfWeek Day of the week the occasion occurs at
  * */
 data class Occasion(
-    val id: Int,
+    val id: UUID,
     val occasionId: Int,
     val subject: Subject,
     val location: Location,
@@ -142,23 +145,43 @@ data class Occasion(
 
 
 /**
- * Lesson repsentation
+ * Lesson representation
  *
  * Stores information about a specific occurrence of a subject. Unlike [Occasion] witch
  * represents when in a week a lesson might be scheduled for. This class represents exactly one
  * schedule item.
  *
- * @param id Unique identifier
  * @param occasion Parent occasion
  * @param week Week this lesson is scheduled for
  * @param date Date this lesson is scheduled for
+ * @param uuid UUID to use, if null a new uuid will be generated
+ *
+ * @property id Unique identifier, if [uuid] is not null it will be used, otherwise a new is generated
+ * @property subject Parent subject
+ * @property name subject name
+ * @property location Where the lesson is going to be taking place
+ * @property dayOfWeek What day of the week the lesson happens on
+ * @property startTime [LocalDateTime] object representing when the lesson starts
+ * @property endTime [LocalDateTime] object representing when the lesson ends
  * */
 data class Lesson (
-    val id: Int,
     val occasion: Occasion,
     val week: Int,
     val date: LocalDate,
-)
+    val uuid: UUID? = null,
+) {
+
+    // generate a new uuid if [uuid] is null
+    val id: UUID = uuid.also { uuid }?: run { UUID.randomUUID() }
+
+    val subject = occasion.subject
+    val name = subject.name
+    val location = occasion.location
+
+    val dayOfWeek = occasion.dayOfWeek
+    val startTime = occasion.startTime.atDate(date)
+    val endTime = occasion.endTime.atDate(date)
+}
 
 
 
@@ -167,10 +190,14 @@ data class Lesson (
  *
  * A location that a occasion is scheduled at. I.E a classroom
  *
- * @param id Unique identifier
+ * @param uuid UUID to use, if null a new UUID is generated
  * @param name What the place is called
+ *
+ * @property id Unique identifier
  * */
 data class Location (
-    val id: Int,
     val name: String,
-)
+    val uuid: UUID? = null,
+) {
+    val id = uuid.also { uuid }?:run { UUID.randomUUID() }
+}

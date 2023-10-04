@@ -57,7 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.schoolhard.API.API
 import com.example.schoolhard.API.School
-import com.example.schoolhard.API.SchoolSoftAPI
+import com.example.schoolhard.API.SchoolSoft.SchoolSoftAPI
 import com.example.schoolhard.API.UserType
 import com.example.schoolhard.data.Logins
 import com.example.schoolhard.ui.theme.SchoolHardTheme
@@ -113,16 +113,12 @@ fun Content(modifier: Modifier=Modifier, logins: Logins, api: API, vibrationMana
 
     val login = {
         api.login(
-            identification = username.value,
+            username = username.value,
             password = password.value,
             school = school.value!!,
             type = type.value,
         ) {
-            logins.saveLogin(
-                url = school.value!!.url,
-                user = it.user,
-                setActive = true
-            )
+            api.saveLogin(logins)
             startApp()
         }
     }
@@ -136,7 +132,7 @@ fun Content(modifier: Modifier=Modifier, logins: Logins, api: API, vibrationMana
         api.schools {
 
             schools.clear()
-            it.schools.forEach {school ->
+            it.forEach {school ->
                 schools.add(school)
             }
 
