@@ -5,7 +5,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.provider.ContactsContract.Data
 import android.util.Log
 import com.example.schoolhard.API.API
 import com.example.schoolhard.API.Lesson
@@ -16,7 +15,9 @@ import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.chrono.ChronoLocalDate
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.Exception
 
@@ -27,7 +28,7 @@ private val dateTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("uuu
 private val OLD_TABLES = listOf("schema")
 
 class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
-    SQLiteOpenHelper(context, "schema", factory, 12) {
+    SQLiteOpenHelper(context, "schema", factory, 21) {
 
     private val utils = Utils()
 
@@ -39,9 +40,12 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
     override fun onCreate(db: SQLiteDatabase) {
         Log.v("Database", "creating tables ${Schema.Subject.table}, ${Schema.Occasion.table}, ${Schema.Lesson.table}")
 
-        db.execSQL(Schema.Subject.createQuery())
-        db.execSQL(Schema.Occasion.createQuery())
-        db.execSQL(Schema.Lesson.createQuery())
+        val queries = listOf(Schema.Subject.createQuery(), Schema.Occasion.createQuery(), Schema.Lesson.createQuery())
+
+        queries.forEach { query ->
+            Log.v("Database - createTables", "executing query: $query")
+            db.execSQL(query)
+        }
 
         Log.v("Database", "done creating tables")
     }
@@ -352,7 +356,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         val results = mutableListOf<Subject>()
 
         // read database
-        val query = "SELECT * FROM $SUBJECTS"
+        val query = "SELECT * FROM ${Schema.Subject.table}"
         val cursor = this.readableDatabase.rawQuery(query, null)
         cursor.moveToFirst()
 
@@ -360,9 +364,9 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
 
             // TODO: Move parse to separate function
             val subject = Subject(
-                cursor.getInt(2),
-                cursor.getString(3),
-                UUID.fromString(cursor.getString(1))
+                cursor.getInt(Schema.Subject.Columns.subjectId.index),
+                cursor.getString(Schema.Subject.Columns.name.index),
+                UUID.fromString(cursor.getString(Schema.Subject.Columns.uuid.index))
             )
 
             results.add(subject)
@@ -408,7 +412,23 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @return parsed occasion object or null if no occasion is found
      * */
     fun getOccasion(uuid: String, parent: Subject): Occasion? {
-        TODO("Not Implemented")
+        Log.v("Database - getOccasion", "Fetching occasion with uuid $uuid")
+
+        val db = this.readableDatabase
+
+        // make and execute request
+        val query = Utils.Query.occasionQuery(uuid)
+        val cursor = db.rawQuery(query.query, query.args)
+
+        // null check
+        if (cursor.count != 1) { return null }
+
+        // parse
+        cursor.moveToFirst()
+        val occasion = utils.parseOccasion(this, cursor, mutableListOf(parent))
+        cursor.close()
+
+        return occasion
     }
 
     /**
@@ -435,6 +455,8 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         val subject = utils.parseSubject(cursor)
         cursor.close()
 
+        Log.v("Database - getSubject", "Got subject ${subject.name}")
+
         return subject
     }
 
@@ -458,7 +480,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         values.put("subjectId", subject.subjectId)
         values.put("name", subject.name)
 
-        db.insert(SUBJECTS, null, values)
+        db.insert(Schema.Subject.table, null, values)
     }
 
 
@@ -476,10 +498,10 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         values.put("subjectUUID", occasion.subject.id.toString())
         values.put("location", occasion.location.name)
         values.put("dayOfWeek", occasion.dayOfWeek.ordinal)
-        values.put("startTime", occasion.startTime.format(timeFormat))
-        values.put("endTime", occasion.endTime.format(timeFormat))
+        values.put("startTime", ChronoUnit.MINUTES.between(LocalTime.MIN, occasion.startTime))
+        values.put("endTime", ChronoUnit.MINUTES.between(LocalTime.MIN, occasion.endTime))
 
-        db.insert(OCCASIONS, null, values)
+        db.insert(Schema.Occasion.table, null, values)
     }
 
 
@@ -502,13 +524,13 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         values.put("week", lesson.week)
 
         // days from [LocalDate.MIN] witch is always the same
-        values.put("date", Duration.between(lesson.date.atTime(0, 0), LocalDate.MIN.atTime(0, 0)).toDays())
+        values.put("date", ChronoUnit.DAYS.between(LocalDate.ofYearDay(2000, 1), lesson.date))
 
         // represent time as minutes from start of day
-        values.put("startTime", Duration.between(lesson.startTime, lesson.date.atTime(0, 0)).toMinutes())
-        values.put("endTime", Duration.between(lesson.endTime, lesson.date.atTime(0, 0)).toMinutes())
+        values.put("startTime", ChronoUnit.MINUTES.between(LocalTime.MIN, lesson.startTime.toLocalTime()))
+        values.put("endTime", ChronoUnit.MINUTES.between(LocalTime.MIN, lesson.endTime.toLocalTime()))
 
-        db.insert(LESSONS, null, values)
+        db.insert(Schema.Lesson.table, null, values)
     }
 
 

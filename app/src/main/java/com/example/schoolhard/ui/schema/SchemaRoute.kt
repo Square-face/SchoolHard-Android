@@ -1,5 +1,6 @@
 package com.example.schoolhard.ui.schema
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.WorkRequest
+import androidx.work.Worker
+import androidx.work.WorkerParameters
 import com.example.schoolhard.API.API
 import com.example.schoolhard.API.Lesson
 import com.example.schoolhard.API.Occasion
@@ -50,12 +56,13 @@ fun SchemaRoute(modifier: Modifier = Modifier, api: API, database: Database) {
 
         val lessons = remember { mutableStateOf(listOf<Lesson>()) }
 
+
+
+
         LaunchedEffect(key1 = true) {
             updateSchemaContent(database, LocalDate.now(), lessons)
-            database.updateSchema(api) {
-                updateSchemaContent(database, LocalDate.now(), lessons)
-            }
         }
+
 
         DayInfo(update = { date: LocalDate -> updateSchemaContent(database, date, lessons) })
         Schema(lessons = lessons.value)

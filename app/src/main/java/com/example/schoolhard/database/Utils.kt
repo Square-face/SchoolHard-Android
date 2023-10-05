@@ -1,11 +1,14 @@
 package com.example.schoolhard.database
 
 import android.database.Cursor
+import android.util.Log
 import com.example.schoolhard.API.Lesson
+import com.example.schoolhard.API.Location
 import com.example.schoolhard.API.Occasion
 import com.example.schoolhard.API.Subject
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalTime
 import java.util.UUID
 
 
@@ -35,17 +38,19 @@ class Utils {
         subjects: MutableList<Subject> = mutableListOf(),
     ): Lesson {
 
-        val occasionUUID = cursor.getString(3)
-        val subjectUUID = cursor.getString(3)
+        val occasionUUID = cursor.getString(Schema.Lesson.Columns.occasionUUID.index)
+        val subjectUUID = cursor.getString(Schema.Lesson.Columns.subjectUUID.index)
 
         val subject = findOrGet(db, subjects, subjectUUID)
         val occasion = findOrGet(db, subject, occasions, occasionUUID)
 
+        Log.v("TEST", cursor.getInt(Schema.Lesson.Columns.date.index).toString())
+
         return Lesson(
             occasion,
-            cursor.getInt(6),
-            LocalDate.MIN.plusDays(cursor.getInt(9).toLong()),
-            UUID.fromString(cursor.getString(2))
+            cursor.getInt(Schema.Lesson.Columns.week.index),
+            LocalDate.ofYearDay(2000, 1).plusDays(cursor.getInt(Schema.Lesson.Columns.date.index).toLong()),
+            UUID.fromString(cursor.getString(Schema.Lesson.Columns.uuid.index))
         )
     }
 
@@ -63,7 +68,19 @@ class Utils {
         cursor: Cursor,
         subjects: MutableList<Subject>
     ): Occasion {
-        TODO("Not Implemented")
+
+        val subjectUUID = cursor.getString(Schema.Occasion.Columns.subjectUUID.index)
+        val subject = findOrGet(db, subjects, subjectUUID)
+
+        return Occasion(
+            UUID.fromString(cursor.getString(Schema.Occasion.Columns.uuid.index)),
+            cursor.getInt(Schema.Occasion.Columns.occasionId.index),
+            subject,
+            Location(cursor.getString(Schema.Occasion.Columns.location.index)),
+            LocalTime.MIN.plusMinutes(cursor.getInt(Schema.Occasion.Columns.startTime.index).toLong()),
+            LocalTime.MIN.plusMinutes(cursor.getInt(Schema.Occasion.Columns.endTime.index).toLong()),
+            DayOfWeek.of(cursor.getInt(Schema.Occasion.Columns.dayOfWeek.index))
+        )
     }
 
 
@@ -71,9 +88,15 @@ class Utils {
      * Parse a subject from a cursor and the position it is currently in
      *
      * @param cursor Cursor to parse from
+     *
+     * @return Parsed subject
      * */
     fun parseSubject(cursor: Cursor): Subject {
-        TODO("Not Implemented")
+        return Subject(
+            cursor.getInt(Schema.Subject.Columns.subjectId.index),
+            cursor.getString(Schema.Subject.Columns.name.index),
+            UUID.fromString(cursor.getString(Schema.Subject.Columns.uuid.index))
+        )
     }
 
 
@@ -158,7 +181,7 @@ class Utils {
              * @return Query object
              * */
             fun lessonQuery(week: Int, dayOfWeek: DayOfWeek?): Query {
-                var query = "SELECT * FROM ${Database.LESSONS} WHERE week = ?"
+                var query = "SELECT * FROM ${Schema.Lesson.table} WHERE ${Schema.Lesson.Columns.week} = ?"
                 var args = arrayOf(week.toString())
 
                 // only add day of week if it is not null
@@ -183,7 +206,23 @@ class Utils {
              * @return Query object
              * */
             fun subjectQuery(uuid: String): Query {
-                val query = "SELECT * FROM ${Database.SUBJECTS} WHERE uuid = ?"
+                val query = "SELECT * FROM ${Schema.Subject.table} WHERE ${Schema.Subject.Columns.uuid} = ?"
+                val args = arrayOf(uuid)
+
+                return Query(query, args)
+            }
+
+
+
+            /**
+             * Generate a query object with sql string and args
+             *
+             * @param uuid Occasion uuid
+             *
+             * @return Query object
+             * */
+            fun occasionQuery(uuid: String): Query {
+                val query = "SELECT * FROM ${Schema.Occasion.table} WHERE ${Schema.Occasion.Columns.uuid} = ?"
                 val args = arrayOf(uuid)
 
                 return Query(query, args)

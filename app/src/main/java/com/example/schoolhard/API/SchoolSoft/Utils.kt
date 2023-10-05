@@ -210,13 +210,11 @@ class Utils{
     fun parseSchool(
         school: JSONObject
     ): School {
-        Log.d("SchoolSoftAPI - SchoolParse", "SchoolObject: $school")
 
         val name = school.getString("name")
         val url = school.getString("url")
-        val id = UUID.fromString(name).hashCode()
 
-        return School(id, name, url)
+        return School(name, url)
     }
 
 
@@ -237,14 +235,7 @@ class Utils{
         val orgId = organization.getInt("orgId")
         val name = organization.getString("name")
 
-
-        val salt = school.name + orgId
-        val id = UUID
-            .fromString(salt)
-            .hashCode()
-
         return Organization(
-            id = id,
             orgId = orgId,
             school = school,
             name = name
@@ -404,7 +395,7 @@ class Utils{
 
 
     /**
-     * Create a new [Lesson] object from [rawOccasion] with [occasion] as the parent and [week] as the week,
+     * Create a new [Lesson] object with [occasion] as the parent and [week] as the week,
      *
      * @param occasion Parent [Occasion]
      * @param week Week number to base the lesson date on

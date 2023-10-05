@@ -40,8 +40,6 @@ data class TokenResponse(
 /**
  * Schoolsoft api wrapper
  *
- * Implements api routes matching the schema defined in [API]
- *
  * @property status Current api status
  *
  * @author Linus Michelsson
@@ -58,6 +56,8 @@ class SchoolSoftAPI: API {
     private var user: User? = null
 
     private var utils = Utils()
+
+
 
 
 
@@ -78,7 +78,7 @@ class SchoolSoftAPI: API {
             .build()
 
         val request = Request.Builder()
-            .url("${school.url}/rest/app/login")
+            .url("${school.url}rest/app/login")
             .post(body)
             .build()
 
@@ -127,6 +127,8 @@ class SchoolSoftAPI: API {
 
 
 
+
+
     override fun loadLogin(
         logins: Logins,
         failureCallback: (FailedAPIResponse) -> Unit,
@@ -145,13 +147,12 @@ class SchoolSoftAPI: API {
 
         // TODO: save and load school and user
         appKey = logins.login!!.appKey
-        school = School(0, "Unknown", logins.login!!.url)
+        school = School("Unknown", logins.login!!.url)
         user = User(
             0,
             "Unknown",
             school!!,
             Organization(
-                0,
                 1,
                 school!!,
                 "Unknown"
@@ -161,6 +162,9 @@ class SchoolSoftAPI: API {
 
         successCallback()
     }
+
+
+
 
 
     override fun saveLogin(
@@ -184,6 +188,17 @@ class SchoolSoftAPI: API {
 
 
 
+    override fun userInfo(
+        failureCallback: (FailedAPIResponse) -> Unit,
+        successCallback: (User) -> Unit
+    ) {
+        TODO("Not yet implemented")
+    }
+
+
+
+
+
     override fun lessons(
         failureCallback: (FailedAPIResponse) -> Unit,
         successCallback: (List<Lesson>) -> Unit
@@ -199,6 +214,10 @@ class SchoolSoftAPI: API {
             }
         }
     }
+
+
+
+
 
     override fun schools(
         failureCallback: (FailedAPIResponse) -> Unit,
@@ -225,6 +244,9 @@ class SchoolSoftAPI: API {
     }
 
 
+
+
+
     private fun getToken(
         failureCallback: (FailedAPIResponse) -> Unit,
         successCallback: (TokenResponse) -> Unit
@@ -237,7 +259,8 @@ class SchoolSoftAPI: API {
             ))
         }
 
-        // get token request
+
+        // generate token request
         val request = Request.Builder()
             .url("${school!!.url}rest/app/token")
             .addHeader("appversion", "2.3.2")
@@ -246,11 +269,10 @@ class SchoolSoftAPI: API {
             .addHeader("deviceid", "")
             .build()
 
+
         // execute request
-        utils.execute(
-            request,
-            failureCallback,
-        ){
+        utils.execute(request, failureCallback) {
+
             Log.d("SchoolSoftAPI - Token", it.stringBody)
             val body = JSONObject(it.stringBody)
 
@@ -271,6 +293,11 @@ class SchoolSoftAPI: API {
             )
         }
     }
+
+
+
+
+
 
     private fun smartToken(
         failureCallback: (FailedAPIResponse) -> Unit,

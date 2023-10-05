@@ -235,7 +235,7 @@ class Logins(private val store: SharedPreferences) {
     private fun getString(address: String): String? {
 
         val result = store.getString(address, null)
-        Log.d("Logins - readString", "Reading $address data:\n$result")
+        Log.d("Logins - readString", "Reading $address data: $result")
 
         return result
     }
@@ -252,12 +252,12 @@ class Logins(private val store: SharedPreferences) {
 
         // manual check and null return bcs SharedPreferences.getInt can't return null as default
         if (!store.contains(address)) {
-            Log.d("Logins - readInt", "Reading $address data:\nno data")
+            Log.d("Logins - readInt", "Reading $address data: no data")
             return null
         }
 
         val result = store.getInt(address, 0)
-        Log.d("Logins - readInt", "Reading $address data:\n$result")
+        Log.d("Logins - readInt", "Reading $address data: $result")
 
         return result
     }
@@ -273,7 +273,7 @@ class Logins(private val store: SharedPreferences) {
     private fun getSet(address: String): Set<String>?{
 
         val result = store.getStringSet(address, null)
-        Log.d("Logins - readSet", "Reading $address data:\n$result")
+        Log.d("Logins - readSet", "Reading $address data: $result")
 
         return result
     }
@@ -289,7 +289,7 @@ class Logins(private val store: SharedPreferences) {
      * @param value The to be stored string
      * */
     private fun storeString(address: String, value: String) {
-        Log.d("Logins - writeString", "Writing to $address data:\n$value")
+        Log.d("Logins - writeString", "Writing to $address data: $value")
         val editor = store.edit()
         editor.putString(address, value)
         editor.commit()
@@ -306,7 +306,7 @@ class Logins(private val store: SharedPreferences) {
      * @param value The to be stored integer
      * */
     private fun storeInt(address: String, value: Int) {
-        Log.d("Logins - writeInt", "Writing to $address data:\n$value")
+        Log.d("Logins - writeInt", "Writing to $address data: $value")
         val editor = store.edit()
         editor.putInt(address, value)
         editor.commit()
@@ -323,7 +323,7 @@ class Logins(private val store: SharedPreferences) {
      * @param value The to be stored set
      * */
     private fun storeSet(address: String, value: Set<String>) {
-        Log.d("Logins - writeSet", "Writing to $address data:\n$value")
+        Log.d("Logins - writeSet", "Writing to $address data: $value")
         val editor = store.edit()
         editor.putStringSet(address, value)
         editor.commit()

@@ -65,12 +65,10 @@ enum class UserType{
 /**
  * School representation
  *
- * @param id Unique id
  * @param name Name as provided by the api (not modifiable)
  * @param url Url used to login with user information
  * */
 data class School(
-    val id: Int,
     val name: String,
     val url: String,
 )
@@ -87,7 +85,6 @@ data class School(
  * @param name Organization name
  * */
 data class Organization(
-    val id: Int,
     val orgId: Int,
     val school: School,
     val name: String,

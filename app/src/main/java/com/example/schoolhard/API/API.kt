@@ -14,7 +14,7 @@ import com.example.schoolhard.data.Logins
 
 
 /**
- * API SCHEMA
+ * Api schema
  *
  * @property status Current api status
  *

@@ -7,31 +7,33 @@ import kotlin.reflect.KProperty
 class Schema {
     class Lesson {
         companion object {
-            const val table = "subjects"
+            const val table = "lessons"
 
             fun createQuery(): String {
+                Log.d("DBSchema - TableQuery", "Generating table query for $table")
                 return "CREATE TABLE $table (" +
                         Columns.id.columnQuery() + "," +
                         Columns.uuid.columnQuery() + "," +
                         Columns.occasionUUID.columnQuery() + "," +
                         Columns.subjectUUID.columnQuery() + "," +
+                        Columns.date.columnQuery() + "," +
+                        Columns.week.columnQuery() + "," +
+                        Columns.dayOfWeek.columnQuery() + "," +
                         Columns.startTime.columnQuery() + "," +
-                        Columns.endTime.columnQuery() + "," +
-                        Columns.dayOfWeek.columnQuery() +
-                        ")"
+                        Columns.endTime.columnQuery() + ")"
             }
         }
 
         class Columns{ companion object {
-            val id              = Column("id", "INT", 1, true)
-            val uuid            = Column("uuid", "TEXT", 2, true)
-            val occasionUUID    = Column("occasionUUID", "TEXT", 3)
-            val subjectUUID     = Column("subjectUUID", "TEXT", 4)
-            val dayOfWeek       = Column("dayofweek", "INT", 5)
-            val week            = Column("week", "INT", 6)
-            val date            = Column("date", "INT", 7)
-            val startTime       = Column("startTime", "INT", 8)
-            val endTime         = Column("endTime", "INT", 9)
+            val id              = Column("id", "INTEGER", 0, nullAllowed = true, extra = "PRIMARY KEY AUTOINCREMENT")
+            val uuid            = Column("uuid", "TEXT", 1, true)
+            val occasionUUID    = Column("occasionUUID", "TEXT", 2)
+            val subjectUUID     = Column("subjectUUID", "TEXT", 3)
+            val date            = Column("date", "INT", 4)
+            val week            = Column("week", "INT", 5)
+            val dayOfWeek       = Column("dayofweek", "INT", 6)
+            val startTime       = Column("startTime", "INT", 7)
+            val endTime         = Column("endTime", "INT", 8)
         } }
     }
 
@@ -42,6 +44,7 @@ class Schema {
             const val table = "occasions"
 
             fun createQuery(): String {
+                Log.d("DBSchema - TableQuery", "Generating table query for ${Lesson.table}")
                 return "CREATE TABLE $table (" +
                         Columns.id.columnQuery() + "," +
                         Columns.uuid.columnQuery() + "," +
@@ -56,14 +59,14 @@ class Schema {
         }
 
         class Columns { companion object {
-            val id = Column("id", "INT", 1, true)
-            val uuid = Column("uuid", "TEXT", 2, true)
-            val occasionId = Column("occasionId", "INT", 3)
-            val subjectUUID = Column("subjectUUID", "TEXT", 4)
-            val location = Column("location", "TEXT", 5)
-            val startTime = Column("startTime", "INT", 6)
-            val endTime = Column("endTime", "INT", 7)
-            val dayOfWeek = Column("dayOfWeek", "INT", 8)
+            val id = Column("id", "INTEGER", 0, nullAllowed = true, extra = "PRIMARY KEY AUTOINCREMENT")
+            val uuid = Column("uuid", "TEXT", 1, true)
+            val occasionId = Column("occasionId", "INT", 2)
+            val subjectUUID = Column("subjectUUID", "TEXT", 3)
+            val location = Column("location", "TEXT", 4)
+            val startTime = Column("startTime", "INT", 5)
+            val endTime = Column("endTime", "INT", 6)
+            val dayOfWeek = Column("dayOfWeek", "INT", 7)
         } }
     }
 
@@ -74,6 +77,7 @@ class Schema {
             const val table = "subjects"
 
             fun createQuery(): String {
+                Log.d("DBSchema - TableQuery", "Generating table query for ${Lesson.table}")
                 return "CREATE TABLE $table (" +
                         Columns.id.columnQuery() + "," +
                         Columns.uuid.columnQuery() + "," +
@@ -84,10 +88,10 @@ class Schema {
         }
 
         class Columns { companion object {
-            val id              = Column("id", "INT", 1, true, true, extra = " PRIMARY KEY AUTOINCREMENT")
-            val uuid            = Column("uuid", "TEXT", 2, true)
-            val subjectId       = Column("subjectId", "INT", 3, true)
-            val name            = Column("name", "TEXT", 4)
+            val id              = Column("id", "INTEGER", 0, nullAllowed = true, extra = "PRIMARY KEY AUTOINCREMENT")
+            val uuid            = Column("uuid", "TEXT", 1, true)
+            val subjectId       = Column("subjectId", "INT", 2, true)
+            val name            = Column("name", "TEXT", 3)
         } }
     }
 }
