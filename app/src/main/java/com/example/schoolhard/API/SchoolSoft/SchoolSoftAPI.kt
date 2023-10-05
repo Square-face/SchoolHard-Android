@@ -5,6 +5,7 @@ import com.example.schoolhard.API.API
 import com.example.schoolhard.API.APIResponse
 import com.example.schoolhard.API.APIResponseFailureReason
 import com.example.schoolhard.API.APIResponseType
+import com.example.schoolhard.API.APIStatus
 import com.example.schoolhard.API.FailedAPIResponse
 import com.example.schoolhard.API.Lesson
 import com.example.schoolhard.API.Organization
@@ -45,8 +46,8 @@ data class TokenResponse(
  *
  * @author Linus Michelsson
  * */
-class SchoolSoftAPI: API() {
-
+class SchoolSoftAPI: API {
+    override val status = APIStatus()
 
     private var appKey: String? = null
     private var token: String? = null

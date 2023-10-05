@@ -17,16 +17,25 @@ import com.example.schoolhard.API.API
 import com.example.schoolhard.API.Lesson
 import com.example.schoolhard.API.Occasion
 import com.example.schoolhard.database.Database
+import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.temporal.ChronoField
+import java.time.temporal.IsoFields
+import java.time.temporal.TemporalAccessor
+import java.time.temporal.TemporalField
 import kotlin.coroutines.coroutineContext
 
 fun updateSchemaContent(database: Database, date: LocalDate, lessons: MutableState<List<Lesson>>) {
-    Log.v("UpdatingUISchema", "$date")
+    Log.d("UpdatingUISchema", "querying for date $date")
 
-    val subjects = database.getSubjects()
-    val occasions = subjects.flatMap { database.getOccasions(it) }
+    // TODO: Implement getSchedule method that uses date and then implement here
+    lessons.value = database.getSchedule(date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR), DayOfWeek.of(date.get(ChronoField.DAY_OF_WEEK)))
+}
 
-    lessons.value = occasions.flatMap { database.getLessons(it) }.filter { it.date == date }.sortedBy { it.startTime }
+fun updateSchemaContent(database: Database, week: Int, dayOfWeek: DayOfWeek, lessons: MutableState<List<Lesson>>) {
+    Log.d("UpdatingUISchema", "querying for ${dayOfWeek.name} on week $week")
+
+    lessons.value = database.getSchedule(week, dayOfWeek)
 }
 
 @Composable

@@ -1,8 +1,6 @@
 package com.example.schoolhard.database
 
 import android.database.Cursor
-import android.database.sqlite.SQLiteDatabase
-import android.util.Log
 import com.example.schoolhard.API.Lesson
 import com.example.schoolhard.API.Occasion
 import com.example.schoolhard.API.Subject
@@ -10,40 +8,23 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.util.UUID
 
+
+
+/**
+ * Helper class with utility functions used by [Database]
+ * */
 class Utils {
 
 
-    /**
-     * Generate a query object with
-     *
-     * @param week Week number to use in the query
-     * @param dayOfWeek Optional day number to use in the query
-     *
-     * @return Query object
-     * */
-    fun generateLessonQuery(week: Int, dayOfWeek: DayOfWeek?): Query {
-        var query = "SELECT * FROM $LESSONS WHERE week = ?"
-        var args = arrayOf(week.toString())
-
-        // only add day of week if it is not null
-        if (dayOfWeek != null) {
-            query += " AND dayofweek = ?"
-
-            args = arrayOf(
-                week.toString(),
-                dayOfWeek.value.toString()
-            )
-        }
-
-        return Query(query, args)
-    }
 
 
 
     /**
      * Parse a lesson from a cursor and the position it is currently in
      *
-     * @param cursor the cursor to parse from
+     * @param db Database to use to get occasions or subjects if they don't exist
+     * in [occasions] or [subjects]
+     * @param cursor Cursor to parse from
      * @param occasions optional list of already parsed occasions
      * @param subjects optional list of already parsed subjects
      * */
@@ -66,7 +47,33 @@ class Utils {
             LocalDate.MIN.plusDays(cursor.getInt(9).toLong()),
             UUID.fromString(cursor.getString(2))
         )
+    }
 
+
+    /**
+     * Parse an occasion from a cursor and the position it is currently in
+     *
+     * @param db Database to use to get occasions or subjects if they don't exist
+     * in [subjects]
+     * @param cursor Cursor to parse from
+     * @param subjects optional list of already parsed subjects
+     * */
+    fun parseOccasion(
+        db: Database,
+        cursor: Cursor,
+        subjects: MutableList<Subject>
+    ): Occasion {
+        TODO("Not Implemented")
+    }
+
+
+    /**
+     * Parse a subject from a cursor and the position it is currently in
+     *
+     * @param cursor Cursor to parse from
+     * */
+    fun parseSubject(cursor: Cursor): Subject {
+        TODO("Not Implemented")
     }
 
 
@@ -125,10 +132,62 @@ class Utils {
             return@run occasion
         }
     }
+
+    /**
+     * SQL query representation.
+     *
+     * Represent a sql query with the query itself and the args
+     *
+     * @property query The SQL query in text
+     * @property args The args to replace all ? with
+     *
+     * @author Linus Michelsson
+     * */
+    class Query(
+        val query: String,
+        val args: Array<String>,
+    ) {
+        companion object {
+
+            /**
+             * Generate a query object with sql string and args
+             *
+             * @param week Week number to use in the query
+             * @param dayOfWeek Optional day number to use in the query
+             *
+             * @return Query object
+             * */
+            fun lessonQuery(week: Int, dayOfWeek: DayOfWeek?): Query {
+                var query = "SELECT * FROM ${Database.LESSONS} WHERE week = ?"
+                var args = arrayOf(week.toString())
+
+                // only add day of week if it is not null
+                if (dayOfWeek != null) {
+                    query += " AND dayofweek = ?"
+
+                    args = arrayOf(
+                        week.toString(),
+                        dayOfWeek.value.toString()
+                    )
+                }
+
+                return Query(query, args)
+            }
+
+
+            /**
+             * Generate a query object with sql string and args
+             *
+             * @param uuid Subject uuid
+             *
+             * @return Query object
+             * */
+            fun subjectQuery(uuid: String): Query {
+                val query = "SELECT * FROM ${Database.SUBJECTS} WHERE uuid = ?"
+                val args = arrayOf(uuid)
+
+                return Query(query, args)
+            }
+        }
+    }
 }
-
-
-data class Query(
-    val query: String,
-    val args: Array<String>,
-)

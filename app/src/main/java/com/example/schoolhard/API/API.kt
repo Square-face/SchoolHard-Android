@@ -20,8 +20,8 @@ import com.example.schoolhard.data.Logins
  *
  * @author Linus Michelsson
  * */
-open class API {
-    val status = APIStatus()
+interface API {
+    val status: APIStatus
 
     /**
      * Attempt login using username, password, school and usertype. If the login is successful the
@@ -36,14 +36,14 @@ open class API {
      * connection error
      * @param successCallback Lambda function to run on a separate thread if the request succeeds.
      * */
-    open fun login(
+    fun login(
         username: String,
         password: String,
         school: School,
         type: UserType,
         failureCallback: (FailedAPIResponse)->(Unit) = { response -> Log.e("API", response.message) },
         successCallback: (User)->(Unit) = {},
-    ){}
+    )
 
 
 
@@ -53,10 +53,10 @@ open class API {
      * @param failureCallback Lambda function to run on separate thread if the request fails in any way.
      * @param successCallback Lambda function to run on a separate thread if the request succeeds.
      * */
-    open fun logout(
+    fun logout(
         failureCallback: (FailedAPIResponse)->(Unit) = { response -> Log.e("API", response.message) },
         successCallback: ()->(Unit) = {},
-    ){}
+    )
 
 
 
@@ -66,10 +66,10 @@ open class API {
      * @param failureCallback Lambda function to run on separate thread if the request fails in any way.
      * @param successCallback Lambda function to run on a separate thread if the request succeeds.
      * */
-    open fun lessons(
+    fun lessons(
         failureCallback: (FailedAPIResponse)->(Unit) = { response -> Log.e("API", response.message) },
         successCallback: (List<Lesson>)->(Unit) = {},
-    ){}
+    )
 
 
 
@@ -79,10 +79,10 @@ open class API {
      * @param failureCallback Lambda function to run on separate thread if the request fails in any way.
      * @param successCallback Lambda function to run on a separate thread if the request succeeds.
      * */
-    open fun userInfo(
+    fun userInfo(
         failureCallback: (FailedAPIResponse)->(Unit) = { response -> Log.e("API", response.message) },
         successCallback: (User)->(Unit) = {},
-    ){}
+    )
 
 
 
@@ -92,10 +92,10 @@ open class API {
      * @param failureCallback Lambda function to run on separate thread if the request fails in any way.
      * @param successCallback Lambda function to run on a separate thread if the request succeeds.
      * */
-    open fun schools(
+    fun schools(
         failureCallback: (FailedAPIResponse)->(Unit) = { response -> Log.e("API", response.message) },
         successCallback: (List<School>)->(Unit) = {},
-    ){}
+    )
 
 
 
@@ -106,11 +106,11 @@ open class API {
      * @param failureCallback Lambda function to run on separate thread if the request fails in any way.
      * @param successCallback Lambda function to run on a separate thread if the request succeeds.
      * */
-    open fun saveLogin(
+    fun saveLogin(
         logins: Logins,
         failureCallback: (FailedAPIResponse)->(Unit) = { response -> Log.e("API", response.message) },
         successCallback: ( )->(Unit) = {},
-    ) {}
+    )
 
 
 
@@ -121,11 +121,11 @@ open class API {
      * @param failureCallback Lambda function to run on separate thread if the request fails in any way.
      * @param successCallback Lambda function to run on a separate thread if the request succeeds.
      * */
-    open fun loadLogin(
+    fun loadLogin(
         logins: Logins,
         failureCallback: (FailedAPIResponse)->(Unit) = { response -> Log.e("API", response.message) },
         successCallback: ()->(Unit) = {},
-    ) {}
+    )
 }
 
 

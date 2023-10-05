@@ -3,9 +3,9 @@ package com.example.schoolhard.database
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.provider.ContactsContract.Data
 import android.util.Log
 import com.example.schoolhard.API.API
 import com.example.schoolhard.API.Lesson
@@ -15,24 +15,19 @@ import com.example.schoolhard.API.Occasion
 import java.time.DayOfWeek
 import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoField
 import java.util.UUID
+import kotlin.Exception
 
-val timeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
-val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu/MM/dd")
-val dateTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss")
+private val timeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+private val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu/MM/dd")
+private val dateTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss")
 
-val OLD_TABLES = listOf("schema")
-
-const val SUBJECTS = "subjects"
-const val OCCASIONS = "occasions"
-const val LESSONS = "lessons"
+private val OLD_TABLES = listOf("schema")
 
 class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
-    SQLiteOpenHelper(context, "schema", factory, 11) {
+    SQLiteOpenHelper(context, "schema", factory, 12) {
 
     private val utils = Utils()
 
@@ -42,42 +37,11 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @param db writable database version
      * */
     override fun onCreate(db: SQLiteDatabase) {
-        Log.v("Database", "creating tables $SUBJECTS, $OCCASIONS, $LESSONS")
+        Log.v("Database", "creating tables ${Schema.Subject.table}, ${Schema.Occasion.table}, ${Schema.Lesson.table}")
 
-
-        val subjectQuery = ("CREATE TABLE $SUBJECTS ("
-                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "uuid TEXT UNIQUE NOT NULL,"
-                + "subjectId INT NOT NULL,"
-                + "name TEXT NOT NULL"
-                + ")")
-
-        val occasionQuery = ("CREATE TABLE $OCCASIONS ("
-                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "uuid TEXT UNIQUE NOT NULL, "
-                + "occasionId INT NOT NULL,"
-                + "subjectUUID TEXT NOT NULL,"
-                + "location TEXT NOT NULL,"
-                + "startTime TEXT NOT NULL,"
-                + "endTime TEXT NOT NULL,"
-                + "dayOfWeek INT NOT NULL"
-                + ")")
-
-        val lessonQuery = ("CREATE TABLE $LESSONS ("
-                + "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + "uuid TEXT UNIQUE NOT NULL,"
-                + "occasionUUID TEXT NOT NULL,"
-                + "subjectUUID TEXT NOT NULL,"
-                + "dayofweek INT NOT NULL,"
-                + "week INT NOT NULL,"
-                + "date INT NOT NULL,"
-                + "startTime INT NOT NULL,"
-                + "endTime INT NOT NULL,"
-                + ")")
-
-        db.execSQL(occasionQuery)
-        db.execSQL(subjectQuery)
-        db.execSQL(lessonQuery)
+        db.execSQL(Schema.Subject.createQuery())
+        db.execSQL(Schema.Occasion.createQuery())
+        db.execSQL(Schema.Lesson.createQuery())
 
         Log.v("Database", "done creating tables")
     }
@@ -90,11 +54,11 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @param db writable database object
      * */
     private fun dropAllTables(db: SQLiteDatabase){
-        Log.w("Database", "Dropping tables $SUBJECTS, $OCCASIONS, $LESSONS, $OLD_TABLES")
+        Log.w("Database", "Dropping tables ${Schema.Subject.table}, ${Schema.Occasion.table}, ${Schema.Lesson.table}, $OLD_TABLES")
 
-        db.execSQL("DROP TABLE IF EXISTS $SUBJECTS")
-        db.execSQL("DROP TABLE IF EXISTS $OCCASIONS")
-        db.execSQL("DROP TABLE IF EXISTS $LESSONS")
+        db.execSQL("DROP TABLE IF EXISTS ${Schema.Subject.table}")
+        db.execSQL("DROP TABLE IF EXISTS ${Schema.Occasion.table}")
+        db.execSQL("DROP TABLE IF EXISTS ${Schema.Lesson.table}")
 
         OLD_TABLES.forEach { db.execSQL("DROP TABLE IF EXISTS $it") }
 
@@ -161,6 +125,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
             db.setTransactionSuccessful()
             db.endTransaction()
             db.close()
+
             Log.d("Database - UpdateSchema", "Finished caching schema to database")
             finishedCallback(true)
         }
@@ -171,7 +136,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
 
 
     /**
-     * Get parts of the schedule based on a filter
+     * Get parts of the schedule based on a filter with week and optional weekday
      *
      * @param week The requested week
      * @param dayOfWeek The day of the week, can be null in witch case the entire week will be returned
@@ -182,16 +147,10 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         Log.d("Database - getSchedule", "Getting schedule with query (week: $week, dayOfWeek: $dayOfWeek)")
         val db = this.readableDatabase
 
-        // the query changes if day of week is null
-        val args = if (dayOfWeek != null) {
-            query += " AND dayofweek = ?"
-            arrayOf(week.toString(), dayOfWeek.value.toString())
-        } else {
-            arrayOf(week.toString())
-        }
+        val query = Utils.Query.lessonQuery(week, dayOfWeek)
 
         // execute sql query
-        val cursor = db.rawQuery(query, args)
+        val cursor = db.rawQuery(query.query, query.args)
         Log.v("Database - getSchedule", "query returned with ${cursor.count} rows")
 
         // cache
@@ -229,7 +188,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         Log.v("Database - createSubjectIfNotExist", "Subject ${subject.name} - ${subject.id}")
 
         val cursor = db.rawQuery(
-            "SELECT * FROM $SUBJECTS WHERE uuid = ?",
+            "SELECT * FROM ${Schema.Subject.table} WHERE ${Schema.Subject.Columns.uuid} = ?",
             arrayOf(subject.id.toString()))
         val count = cursor.count
         cursor.close()
@@ -258,9 +217,10 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         Log.v("Database - createOccasionIfNotExist", "Occasion ${occasion.subject.name} at ${occasion.startTime.format(timeFormat)} on ${occasion.dayOfWeek.name}, ${occasion.id}")
 
         val cursor = db.rawQuery(
-            "SELECT * FROM $OCCASIONS WHERE uuid = ?",
+            "SELECT * FROM ${Schema.Occasion.table} WHERE ${Schema.Occasion.Columns.uuid} = ?",
             arrayOf(occasion.id.toString())
         )
+
         val count = cursor.count
         cursor.close()
 
@@ -287,7 +247,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         Log.v("Database - createLessonIfNotExist", "Lesson ${lesson.occasion.subject.name} at ${lesson.date.atTime(lesson.occasion.startTime).format(dateTimeFormat)}, ${lesson.id}")
 
         val cursor = db.rawQuery(
-            "SELECT * FROM $LESSONS WHERE uuid = ?",
+            "SELECT * FROM ${Schema.Lesson.table} WHERE ${Schema.Lesson.Columns.uuid} = ?",
             arrayOf(lesson.id.toString())
         )
         val count = cursor.count
@@ -319,7 +279,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         val results = mutableListOf<Lesson>()
 
         // read database
-        val query = "SELECT * FROM $LESSONS WHERE occasionUUID = ?"
+        val query = "SELECT * FROM ${Schema.Lesson.table} WHERE ${Schema.Lesson.Columns.occasionUUID} = ?"
         val cursor = this.readableDatabase.rawQuery(query, arrayOf(occasion.id.toString()))
         cursor.moveToFirst()
 
@@ -328,8 +288,8 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
             // TODO: Move parse to separate function
             val lesson = Lesson(
                 occasion,
-                cursor.getInt(1),
-                LocalDate.parse(cursor.getString(3), dateFormat),
+                cursor.getInt(Schema.Lesson.Columns.week.index),
+                LocalDate.parse(cursor.getString(Schema.Lesson.Columns.date.index), dateFormat),
             )
             results.add(lesson)
 
@@ -349,11 +309,12 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      *
      * @return list of occasions with [subject] as parent
      * */
+    @SuppressLint("Range")
     fun getOccasions(subject: Subject): List<Occasion> {
         Log.v("Database - FetchOccasions", "Fetching occasions with ${subject.id} as parent")
         val results = mutableListOf<Occasion>()
 
-        val query = "SELECT * FROM $OCCASIONS WHERE subjectUUID = ?"
+        val query = "SELECT * FROM ${Schema.Occasion.table} WHERE ${Schema.Occasion.Columns.subjectUUID} = ?"
         val cursor = this.readableDatabase.rawQuery(query, arrayOf(subject.id.toString()))
         cursor.moveToFirst()
 
@@ -458,7 +419,23 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @return parsed subject object or null if no subject is found
      * */
     fun getSubject(uuid: String): Subject? {
-        TODO("Not Implemented")
+        Log.v("Database - getSubject", "Fetching subject with uuid $uuid")
+
+        val db = this.readableDatabase
+
+        // make and execute request
+        val query = Utils.Query.subjectQuery(uuid)
+        val cursor = db.rawQuery(query.query, query.args)
+
+        // null check
+        if (cursor.count != 1) { return null }
+
+        // parse
+        cursor.moveToFirst()
+        val subject = utils.parseSubject(cursor)
+        cursor.close()
+
+        return subject
     }
 
 
@@ -525,7 +502,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         values.put("week", lesson.week)
 
         // days from [LocalDate.MIN] witch is always the same
-        values.put("date", Duration.between(lesson.date, LocalDate.MIN).toDays())
+        values.put("date", Duration.between(lesson.date.atTime(0, 0), LocalDate.MIN.atTime(0, 0)).toDays())
 
         // represent time as minutes from start of day
         values.put("startTime", Duration.between(lesson.startTime, lesson.date.atTime(0, 0)).toMinutes())
@@ -533,4 +510,17 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
 
         db.insert(LESSONS, null, values)
     }
+
+
+
+    /**
+     * Database related exceptions
+     * */
+    class Exceptions {
+
+        class SubjectNotFound(uuid: String): Exception("Subject with uuid $uuid was not found in the database")
+        class OccasionNotFound(uuid: String): Exception("Occasion with uuid $uuid was not found in the database")
+        class LessonNotFound(uuid: String): Exception("Lesson with uuid $uuid was not found in the database")
+    }
+
 }
