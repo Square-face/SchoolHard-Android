@@ -1,6 +1,5 @@
 package com.example.schoolhard.ui.schema
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,22 +13,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
-import androidx.work.WorkRequest
-import androidx.work.Worker
-import androidx.work.WorkerParameters
 import com.example.schoolhard.API.API
 import com.example.schoolhard.API.Lesson
-import com.example.schoolhard.API.Occasion
 import com.example.schoolhard.database.Database
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoField
 import java.time.temporal.IsoFields
-import java.time.temporal.TemporalAccessor
-import java.time.temporal.TemporalField
-import kotlin.coroutines.coroutineContext
 
 fun updateSchemaContent(database: Database, date: LocalDate, lessons: MutableState<List<Lesson>>) {
     Log.d("UpdatingUISchema", "querying for date $date")

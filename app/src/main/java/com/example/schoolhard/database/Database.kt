@@ -497,7 +497,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         values.put("occasionId", occasion.occasionId)
         values.put("subjectUUID", occasion.subject.id.toString())
         values.put("location", occasion.location.name)
-        values.put("dayOfWeek", occasion.dayOfWeek.ordinal)
+        values.put("dayOfWeek", occasion.dayOfWeek.value)
         values.put("startTime", ChronoUnit.MINUTES.between(LocalTime.MIN, occasion.startTime))
         values.put("endTime", ChronoUnit.MINUTES.between(LocalTime.MIN, occasion.endTime))
 
