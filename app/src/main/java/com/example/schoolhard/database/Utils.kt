@@ -180,7 +180,7 @@ class Utils {
              *
              * @return Query object
              * */
-            fun lessonQuery(week: Int, dayOfWeek: DayOfWeek?): Query {
+            fun lessonQuery(week: Int, dayOfWeek: DayOfWeek? = null): Query {
                 var query = "SELECT * FROM ${Schema.Lesson.table} WHERE ${Schema.Lesson.Columns.week} = ?"
                 var args = arrayOf(week.toString())
 
