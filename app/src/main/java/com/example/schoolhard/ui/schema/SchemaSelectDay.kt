@@ -67,9 +67,9 @@ fun DayOfWeekSelect(modifier: Modifier = Modifier, day: MutableState<LocalDate>,
     ) {
         WeekDay(day = day, text = days[0], value = 1, update = update)
         WeekDay(day = day, text = days[1], value = 2, update = update)
-        WeekDay(day = day, text = days[3], value = 3, update = update)
-        WeekDay(day = day, text = days[4], value = 4, update = update)
-        WeekDay(day = day, text = days[5], value = 5, update = update)
+        WeekDay(day = day, text = days[2], value = 3, update = update)
+        WeekDay(day = day, text = days[3], value = 4, update = update)
+        WeekDay(day = day, text = days[4], value = 5, update = update)
     }
 }
 

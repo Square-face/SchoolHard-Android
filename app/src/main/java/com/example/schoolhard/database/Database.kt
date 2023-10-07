@@ -12,10 +12,8 @@ import com.example.schoolhard.API.Location
 import com.example.schoolhard.API.Subject
 import com.example.schoolhard.API.Occasion
 import java.time.DayOfWeek
-import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.chrono.ChronoLocalDate
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.UUID
@@ -53,6 +51,25 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
 
 
     /**
+     * On version bump
+     * Drops and recreates all tables
+     *
+     * @param db writable database
+     * @param p1 Previous version
+     * @param p2 New version
+     * */
+    override fun onUpgrade(db: SQLiteDatabase, p1: Int, p2: Int) {
+        Log.i("Database - Upgrade", "Database version bump from v$p1 to v$p2")
+
+        dropAllTables(db)
+        onCreate(db)
+    }
+
+
+
+
+
+    /**
      * Drop all tables
      *
      * @param db writable database object
@@ -71,20 +88,21 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
 
 
 
-    /**
-     * On version bump
-     * Drops and recreates all tables
-     *
-     * @param db writable database
-     * @param p1 Previous version
-     * @param p2 New version
-     * */
-    override fun onUpgrade(db: SQLiteDatabase, p1: Int, p2: Int) {
-        Log.i("Database - Upgrade", "Database version bump from v$p1 to v$p2")
 
-        dropAllTables(db)
-        onCreate(db)
+
+    /**
+     * Clear all schedule related tables of any entries
+     *
+     * */
+    fun clearSchedule() {
+        val db = this.writableDatabase
+
+        db.execSQL("DELETE FROM ${Schema.Subject.table}")
+        db.execSQL("DELETE FROM ${Schema.Occasion.table}")
+        db.execSQL("DELETE FROM ${Schema.Lesson.table}")
     }
+
+
 
 
 
@@ -98,13 +116,13 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @param finishedCallback Callback to run after updating is finished,
      * takes one boolean argument, if updating succeeded or failed
      * */
-    fun updateSchema(api: API, finishedCallback: (Boolean) -> Unit = {}) {
-        Log.i("Database - UpdateSchema", "Updating schema")
+    fun updateSchedule(api: API, finishedCallback: (Boolean) -> Unit = {}) {
+        Log.i("Database - UpdateSchedule", "Updating schema")
         val db = this.writableDatabase
 
 
         if (db.isDbLockedByCurrentThread) {
-            Log.w("Database - UpdateSchema", "Database looked")
+            Log.w("Database - UpdateSchedule", "Database looked")
             finishedCallback(false)
             return
         }
@@ -118,7 +136,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
             onCreate(db)
 
             response.forEach {lesson ->
-                Log.v("Database - UpdateSchema", "Caching lesson: ${lesson.occasion.subject.name} id: ${lesson.id}")
+                Log.v("Database - UpdateSchedule", "Caching lesson: ${lesson.occasion.subject.name} id: ${lesson.id}")
 
 
                 createLessonIfNotExist(db, lesson)
@@ -130,7 +148,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
             db.endTransaction()
             db.close()
 
-            Log.d("Database - UpdateSchema", "Finished caching schema to database")
+            Log.d("Database - UpdateSchedule", "Finished caching schema to database")
             finishedCallback(true)
         }
     }
