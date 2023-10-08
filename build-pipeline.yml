@@ -20,8 +20,14 @@ steps:
     tasks: 'build'
     jdkVersionOption: 1.17
 
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)'
+    Contents: '**/*.release.apk'
+    TargetFolder: '$(build.artifactStagingDirectory)'
+
 - task: PublishBuildArtifacts@1
   inputs:
     PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'build'
+    ArtifactName: 'prod_apks'
     publishLocation: 'Container'
