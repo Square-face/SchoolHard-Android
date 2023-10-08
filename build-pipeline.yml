@@ -12,7 +12,7 @@ pool:
 steps:
 - task: Gradle@3
   inputs:
-    workingDirectory: '$(System.DefaultWorkingDirectory)'
+    workingDirectory: 'app'
     gradleWrapperFile: 'gradlew'
     gradleOptions: '-Xmx3072m'
     javaHomeOption: 'JDKVersion'
@@ -24,6 +24,6 @@ steps:
 
 - task: PublishPipelineArtifact@1
   inputs:
-    targetPath: '$(System.DefaultWorkingDirectory)/_SchoolHard_Android/app/build/outputs/apk/release/'
-    artifact: 'SignedBuild'
+    targetPath: 'app/build/outputs/apk/release/'
+    artifact: 'ReleaseAPK'
     publishLocation: 'pipeline'
