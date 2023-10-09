@@ -138,10 +138,9 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
             dropAllTables(db)
             onCreate(db)
 
+            Log.d("Database - UpdateSchedule", "Caching ${response.size} lessons")
+
             response.forEach {lesson ->
-                Log.v("Database - UpdateSchedule", "Caching lesson: ${lesson.occasion.subject.name} id: ${lesson.id}")
-
-
                 createLessonIfNotExist(db, lesson)
                 createOccasionIfNotExist(db, lesson.occasion)
                 createSubjectIfNotExist(db, lesson.occasion.subject)
@@ -218,9 +217,10 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         cursor.close()
 
         if (count > 0) {
-            Log.d("Database - createSubjectIfNotExist", "Subject ${subject.id} already exists")
             return false
         }
+
+        Log.v("Database - createSubjectIfNotExist", "Subject ${subject.id} doesn't exist")
 
         storeSubject(db, subject)
         return true
@@ -248,10 +248,11 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         cursor.close()
 
         if (count > 0) {
-            Log.d("Database - createOccasionIfNotExist", "Occasion ${occasion.id} already exists")
             return true
         }
 
+
+        Log.v("Database - createOccasionIfNotExist", "Occasion ${occasion.id} doesn't exist")
 
         storeOccasion(db, occasion)
         return false
@@ -431,7 +432,6 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @return parsed occasion object or null if no occasion is found
      * */
     fun getOccasion(uuid: String, parent: Subject): Occasion? {
-        Log.v("Database - getOccasion", "Fetching occasion with uuid $uuid")
 
         val db = this.readableDatabase
 
@@ -460,7 +460,6 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @return parsed subject object or null if no subject is found
      * */
     fun getSubject(uuid: String): Subject? {
-        Log.v("Database - getSubject", "Fetching subject with uuid $uuid")
 
         val db = this.readableDatabase
 
@@ -494,7 +493,6 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @param subject Subject to save
      * */
     fun storeSubject(db: SQLiteDatabase, subject: Subject) {
-        Log.d("Database - Subject", "Storing subject (${subject.id})")
 
         val values = ContentValues()
 
