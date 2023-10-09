@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
 import com.example.schoolhard.utils.getProgress
+import java.time.Duration
 
 /*=== USER ===*/
 
@@ -170,6 +171,8 @@ data class Lesson (
     val uuid: UUID? = null,
 ) {
 
+
+
     // generate a new uuid if [uuid] is null
     val id: UUID = uuid.also { uuid }?: run { UUID.randomUUID() }
 
@@ -180,6 +183,7 @@ data class Lesson (
     val dayOfWeek = occasion.dayOfWeek
     val startTime = occasion.startTime.atDate(date)
     val endTime = occasion.endTime.atDate(date)
+    val duration = Duration.between(startTime, endTime).toMillis()
 
     // generated on request
     val progress: Float get() { return getProgress(startTime, LocalDateTime.now(), endTime) }
