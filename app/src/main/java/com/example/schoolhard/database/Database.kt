@@ -26,7 +26,7 @@ private val dateTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("uuu
 private val OLD_TABLES = listOf("schema")
 
 class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
-    SQLiteOpenHelper(context, "schema", factory, 21) {
+    SQLiteOpenHelper(context, "schema", factory, 23) {
 
     private val utils = Utils()
 

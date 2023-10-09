@@ -49,8 +49,9 @@ fun SchoolHardApp(
             drawerContent = {
                 AppDrawer(
                     currentRoute = currentRoute,
-                    navigateToHome = navigationActions.navigateToHome,
-                    navigateToToday = navigationActions.navigateToToday,
+                    navigateToToday = navigationActions.navigateToHome,
+                    navigateToSchedule = navigationActions.navigateToSchedule,
+                    navigateToSettings = navigationActions.navigateToSettings,
                     closeDrawer = { coroutineScope.launch { sizeAwareDrawerState.close() } }
                 )
             },

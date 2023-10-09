@@ -49,7 +49,7 @@ fun AppNavRail(
             alwaysShowLabel = false
         )
         NavigationRailItem(
-            selected = currentRoute == SchoolHardDestinations.SCHEMA_ROUTE,
+            selected = currentRoute == SchoolHardDestinations.SCHEDULE_ROUTE,
             onClick = navigateToInterests,
             icon = { Icon(Icons.Filled.Info, stringResource(R.string.schema_title)) },
             label = { Text(stringResource(R.string.schema_title)) },

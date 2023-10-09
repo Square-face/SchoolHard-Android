@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,7 +31,9 @@ import androidx.navigation.compose.rememberNavController
 import com.example.schoolhard.API.API
 import com.example.schoolhard.R
 import com.example.schoolhard.database.Database
-import com.example.schoolhard.ui.schema.SchemaRoute
+import com.example.schoolhard.ui.pages.schema.SchemaRoute
+import com.example.schoolhard.ui.pages.settings.Settings
+import java.util.Locale
 
 @Composable
 fun SchoolHardNavGraph(
@@ -57,27 +60,42 @@ fun SchoolHardNavGraph(
                 .scale(1.5F)
                 .padding(15.dp, 10.dp, 0.dp, 10.dp))
             Spacer(modifier = Modifier.width(30.dp))
-            Text(
-                text = stringResource(id = R.string.app_name),
-                style = TextStyle(
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight(600),
-                    color = Color(0xFFFFFFFF),
+            navController.currentDestination?.let { navDestination ->
+                Text(
+                    text = navDestination.route!!.replaceFirstChar { it.uppercase() },
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight(600),
+                        color = Color(0xFFFFFFFF),
+                    )
                 )
-            )
+            } ?:run {
+                Text(
+                    text = stringResource(id = R.string.app_name),
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight(600),
+                        color = Color(0xFFFFFFFF),
+                    )
+                )
+            }
         }
         NavHost(
             navController = navController,
             startDestination = startDestination,
             modifier = modifier
         ) {
-            composable(
-                route = SchoolHardDestinations.HOME_ROUTE,
-            ) {
+            
+            composable(SchoolHardDestinations.HOME_ROUTE) {
                 Text(modifier = Modifier.padding(30.dp), text="Home")
             }
-            composable(SchoolHardDestinations.SCHEMA_ROUTE) {
+            
+            composable(SchoolHardDestinations.SCHEDULE_ROUTE) {
                 SchemaRoute(api = api, database = database)
+            }
+            
+            composable(SchoolHardDestinations.SETTINGS_ROUTE) {
+                Settings()
             }
         }
     }
