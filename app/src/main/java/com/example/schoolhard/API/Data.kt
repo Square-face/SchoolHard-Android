@@ -6,6 +6,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
+import com.example.schoolhard.utils.getProgress
 
 /*=== USER ===*/
 
@@ -79,7 +80,6 @@ data class School(
 /**
  * Organization representation
  *
- * @param id unique identifier
  * @param orgId id from 1 and counting but only for the parent school
  * @param school parent School
  * @param name Organization name
@@ -160,6 +160,8 @@ data class Occasion(
  * @property dayOfWeek What day of the week the lesson happens on
  * @property startTime [LocalDateTime] object representing when the lesson starts
  * @property endTime [LocalDateTime] object representing when the lesson ends
+ *
+ * @property progress Current progress as a float between 0 and 1. Regenerated every time requested
  * */
 data class Lesson (
     val occasion: Occasion,
@@ -178,6 +180,9 @@ data class Lesson (
     val dayOfWeek = occasion.dayOfWeek
     val startTime = occasion.startTime.atDate(date)
     val endTime = occasion.endTime.atDate(date)
+
+    // generated on request
+    val progress: Float get() { return getProgress(startTime, LocalDateTime.now(), endTime) }
 }
 
 
