@@ -118,17 +118,20 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * */
     fun updateSchedule(api: API, finishedCallback: (Boolean) -> Unit = {}) {
         Log.i("Database - UpdateSchedule", "Updating schema")
-        val db = this.writableDatabase
 
 
-        if (db.isDbLockedByCurrentThread) {
-            Log.w("Database - UpdateSchedule", "Database looked")
-            finishedCallback(false)
-            return
-        }
+
 
 
         api.lessons({ finishedCallback(false) }) {response ->
+
+            val db = this.writableDatabase
+
+            if (db.isDbLockedByCurrentThread) {
+                Log.w("Database - UpdateSchedule", "Database looked")
+                finishedCallback(false)
+                return@lessons
+            }
 
             db.beginTransaction()
 
