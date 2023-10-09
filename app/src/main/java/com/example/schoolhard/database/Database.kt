@@ -26,7 +26,7 @@ private val dateTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("uuu
 private val OLD_TABLES = listOf("schema")
 
 class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
-    SQLiteOpenHelper(context, "schema", factory, 21) {
+    SQLiteOpenHelper(context, "schema", factory, 23) {
 
     private val utils = Utils()
 
@@ -118,17 +118,20 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * */
     fun updateSchedule(api: API, finishedCallback: (Boolean) -> Unit = {}) {
         Log.i("Database - UpdateSchedule", "Updating schema")
-        val db = this.writableDatabase
 
 
-        if (db.isDbLockedByCurrentThread) {
-            Log.w("Database - UpdateSchedule", "Database looked")
-            finishedCallback(false)
-            return
-        }
+
 
 
         api.lessons({ finishedCallback(false) }) {response ->
+
+            val db = this.writableDatabase
+
+            if (db.isDbLockedByCurrentThread) {
+                Log.w("Database - UpdateSchedule", "Database looked")
+                finishedCallback(false)
+                return@lessons
+            }
 
             db.beginTransaction()
 
