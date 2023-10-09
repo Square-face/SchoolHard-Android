@@ -210,11 +210,10 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @return If a new subject was created
      * */
     private fun createSubjectIfNotExist(db: SQLiteDatabase, subject: Subject): Boolean {
-        Log.v("Database - createSubjectIfNotExist", "Subject ${subject.name} - ${subject.id}")
 
         val cursor = db.rawQuery(
-            "SELECT * FROM ${Schema.Subject.table} WHERE ${Schema.Subject.Columns.uuid} = ?",
-            arrayOf(subject.id.toString()))
+            "SELECT * FROM ${Schema.Subject.table} WHERE ${Schema.Subject.Columns.subjectId} = ?",
+            arrayOf(subject.subjectId.toString()))
         val count = cursor.count
         cursor.close()
 
