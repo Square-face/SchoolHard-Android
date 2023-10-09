@@ -1,7 +1,6 @@
 package com.example.schoolhard.database
 
 import android.database.Cursor
-import android.util.Log
 import com.example.schoolhard.API.Lesson
 import com.example.schoolhard.API.Location
 import com.example.schoolhard.API.Occasion
@@ -10,7 +9,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
 import java.util.UUID
-
 
 
 /**
@@ -43,8 +41,6 @@ class Utils {
 
         val subject = findOrGet(db, subjects, subjectUUID)
         val occasion = findOrGet(db, subject, occasions, occasionUUID)
-
-        Log.v("TEST", cursor.getInt(Schema.Lesson.Columns.date.index).toString())
 
         return Lesson(
             occasion,
