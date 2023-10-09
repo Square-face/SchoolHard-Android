@@ -20,7 +20,31 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.ChronoField
 import java.time.temporal.IsoFields
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
+import androidx.work.Worker
+import androidx.work.WorkerParameters
+import com.example.schoolhard.API.SchoolSoft.SchoolSoftAPI
+import com.example.schoolhard.data.Logins
 
+class UpdateSchedule(context: Context, params: WorkerParameters) : Worker(context, params) {
+    override fun doWork(): Result {
+        val store = applicationContext.getSharedPreferences("logins", Context.MODE_PRIVATE)
+        val logins = Logins(store)
+
+        val api = SchoolSoftAPI()
+        api.loadLogin(logins)
+
+        val database = Database(applicationContext, null)
+
+        Log.d("ScheduleWorker", "Updating schedule")
+        database.updateSchedule(api)
+
+        return Result.success()
+    }
+}
 fun updateSchemaContent(database: Database, date: LocalDate, lessons: MutableState<List<Lesson>>) {
     Log.d("UpdatingUISchema", "querying for date $date")
 
@@ -46,13 +70,12 @@ fun SchemaRoute(modifier: Modifier = Modifier, api: API, database: Database) {
 
         val lessons = remember { mutableStateOf(listOf<Lesson>()) }
 
-
-
-
         LaunchedEffect(key1 = true) {
             updateSchemaContent(database, LocalDate.now(), lessons)
         }
 
+        val workRequest = remember { OneTimeWorkRequestBuilder<UpdateSchedule>().build() }
+        WorkManager.getInstance(LocalContext.current).enqueue(workRequest)
 
         DayInfo(update = { date: LocalDate -> updateSchemaContent(database, date, lessons) })
         Schema(lessons = lessons.value)
