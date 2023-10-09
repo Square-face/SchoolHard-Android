@@ -69,7 +69,6 @@ class DatabaseUtilsUnitTest {
             var actual: Utils.Query
 
 
-
             val uuid = UUID.randomUUID()
 
             expected = Utils.Query(
