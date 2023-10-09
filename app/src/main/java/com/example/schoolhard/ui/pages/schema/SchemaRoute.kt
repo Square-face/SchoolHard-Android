@@ -50,12 +50,14 @@ fun updateSchemaContent(database: Database, date: LocalDate, lessons: MutableSta
 
     // TODO: Implement getSchedule method that uses date and then implement here
     lessons.value = database.getSchedule(date.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR), DayOfWeek.of(date.get(ChronoField.DAY_OF_WEEK)))
+    Log.d("UpdatingUISchedule", "Got ${lessons.value.size} lessons")
 }
 
 fun updateSchemaContent(database: Database, week: Int, dayOfWeek: DayOfWeek, lessons: MutableState<List<Lesson>>) {
-    Log.d("UpdatingUISchema", "querying for ${dayOfWeek.name} on week $week")
+    Log.d("UpdatingUISchedule", "Querying for ${dayOfWeek.name} on week $week")
 
     lessons.value = database.getSchedule(week, dayOfWeek)
+    Log.d("UpdatingUISchedule", "Got ${lessons.value.size} lessons")
 }
 
 @Composable

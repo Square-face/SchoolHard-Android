@@ -10,7 +10,6 @@ class Schema {
             const val table = "lessons"
 
             fun createQuery(): String {
-                Log.d("DBSchema - TableQuery", "Generating table query for $table")
                 return "CREATE TABLE $table (" +
                         Columns.id.columnQuery() + "," +
                         Columns.uuid.columnQuery() + "," +
@@ -44,7 +43,6 @@ class Schema {
             const val table = "occasions"
 
             fun createQuery(): String {
-                Log.d("DBSchema - TableQuery", "Generating table query for ${Lesson.table}")
                 return "CREATE TABLE $table (" +
                         Columns.id.columnQuery() + "," +
                         Columns.uuid.columnQuery() + "," +
@@ -77,7 +75,6 @@ class Schema {
             const val table = "subjects"
 
             fun createQuery(): String {
-                Log.d("DBSchema - TableQuery", "Generating table query for ${Lesson.table}")
                 return "CREATE TABLE $table (" +
                         Columns.id.columnQuery() + "," +
                         Columns.uuid.columnQuery() + "," +
@@ -121,8 +118,6 @@ data class Column(
         if (extra != "") {
             query += " $extra"
         }
-
-        Log.v("DBColumn-CreateQuery", "Query: $query")
 
         return query
     }
