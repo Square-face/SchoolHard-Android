@@ -11,10 +11,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import com.example.schoolhard.API.Lesson
+import kotlinx.coroutines.delay
 
 /**
  * Holding class for all lesson view models
@@ -31,9 +38,17 @@ class LessonView(val lesson: Lesson) {
     @Composable
     fun Medium(modifier: Modifier = Modifier) {
 
-        val progress = Progress(lesson.progress)
+        var progress by remember { mutableStateOf(Progress(lesson.progress)) }
+        var time by remember { mutableStateOf(Time(lesson)) }
         val meta = Meta(lesson)
-        val time = Time(lesson)
+
+        LaunchedEffect(Unit) {
+            while(true) {
+                delay(1000)
+                progress = Progress(lesson.progress)
+                time = Time(lesson)
+            }
+        }
 
         Column(
             modifier = modifier
@@ -63,7 +78,9 @@ class LessonView(val lesson: Lesson) {
                         meta.Location()
                     }
 
-                    Column {
+                    Column(
+                        horizontalAlignment = Alignment.End
+                    ) {
                         time.StartTime()
                         time.EndTime()
                     }
