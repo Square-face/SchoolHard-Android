@@ -40,7 +40,7 @@ import kotlin.math.roundToInt
  *
  * @param progress current progress as a float between 0 and 1
  * */
-class Progress(val progress: Float) {
+class Progress(private val progress: Float) {
 
     /**
      * Thin progress view
@@ -213,6 +213,7 @@ class Time(val lesson: Lesson) {
         Text(
             text = time.format(format),
             modifier = modifier,
+            fontSize = 17.sp,
             color = MaterialTheme.colorScheme.background,
             overflow = TextOverflow.Ellipsis,
             softWrap = false,
@@ -231,7 +232,7 @@ class Time(val lesson: Lesson) {
     private fun RawDelta(
         modifier: Modifier = Modifier,
         delta: Long,
-        fontSize: TextUnit = 12.sp,
+        fontSize: TextUnit = 14.sp,
         fontWeight: Int = 700,
     ) {
         Text(
