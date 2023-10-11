@@ -1,8 +1,10 @@
 package com.example.schoolhard.ui.components.lesson
 
+import androidx.annotation.IntRange
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,11 +45,30 @@ import kotlin.math.roundToInt
 class Progress(private val progress: Float) {
 
     /**
-     * Thin progress view
+     * Helper function for calculating a usable radius value.
+     * the output is the same as [base] until progress goes above 0.95, then it starts decreasing to 0
+     *
+     * @param base Base radius
+     * @return radius
+     * */
+    private fun calculateRadius(base: Int): Int {
+        if (progress < 0.95) { return base }
+
+        // stretch progress from 0.95 - 1 to 0 - 1
+        val delta = progress - 0.95
+        val stretched = delta / 0.05
+
+        // calculate radius
+        return base - (stretched * base).roundToInt()
+    }
+
+
+    /**
+     * A thinner lesson view that only shows name and a string representation on the status.
      * */
     @Composable
     fun Thin(modifier: Modifier = Modifier) {
-        val radius = if (progress < 0.9) 4 else ((1F-progress)*4).roundToInt()
+        val radius = calculateRadius(4)
 
         Box(
             modifier = modifier
@@ -130,10 +151,16 @@ class Time(val lesson: Lesson) {
      * @param showDelta if the delta should be displayed
      * @param showDeltaIfPassed if the delta should be displayed after the relevant time has passed.
      * Only relevant if [showDelta] is true
+     * @param deltaPos Where to position the delta. (0, 1, 2, 3) => (left, top, right, bottom).
      * */
     @Composable
-    fun StartTime(modifier: Modifier = Modifier, showDelta: Boolean = true, showDeltaIfPassed: Boolean = false) {
-        RawTimeWithDelta(modifier = modifier, time = lesson.startTime, showDelta = showDelta, showDeltaIfPassed = showDeltaIfPassed)
+    fun StartTime(
+        modifier: Modifier = Modifier,
+        showDelta: Boolean = true,
+        showDeltaIfPassed: Boolean = false,
+        @IntRange(from=0, to=3) deltaPos: Int = 0
+    ) {
+        RawTimeWithDelta(modifier = modifier, time = lesson.startTime, showDelta = showDelta, showDeltaIfPassed = showDeltaIfPassed, deltaPos=deltaPos)
     }
 
 
@@ -148,8 +175,17 @@ class Time(val lesson: Lesson) {
      * Only relevant if [showDelta] is true
      * */
     @Composable
-    fun EndTime(modifier: Modifier = Modifier, showDelta: Boolean = true, showDeltaIfPassed: Boolean = false) {
-        RawTimeWithDelta(modifier = modifier, time = lesson.endTime, showDelta = showDelta, showDeltaIfPassed = showDeltaIfPassed)
+    fun EndTime(modifier: Modifier = Modifier,
+                showDelta: Boolean = true,
+                showDeltaIfPassed: Boolean = false,
+                deltaPos: Int = 0) {
+        RawTimeWithDelta(
+            modifier = modifier,
+            time = lesson.endTime,
+            showDelta = showDelta,
+            showDeltaIfPassed = showDeltaIfPassed,
+            deltaPos = deltaPos
+        )
     }
 
 
@@ -170,6 +206,84 @@ class Time(val lesson: Lesson) {
     }
 
 
+    /**
+     * A text view that displays how long until a lesson starts, ends or how long ago it occurred
+     * */
+    @Composable
+    fun OneLineInfo(modifier: Modifier = Modifier) {
+        val now = LocalDateTime.now()
+
+        // lesson hasn't happened yet
+        if (lesson.startTime.isAfter(now)) { TimeUntil(modifier = modifier); return }
+
+        // lesson has ended
+        if (lesson.endTime.isBefore(now)) { TimeAgo(modifier = modifier); return }
+
+        // lesson is happening right now
+        TimeLeft(modifier = modifier)
+    }
+
+
+
+
+
+    /**
+     * How long ago a lesson ended
+     * */
+    @Composable
+    fun TimeAgo(modifier: Modifier = Modifier) {
+        val delta = getDelta(LocalDateTime.now(), lesson.endTime)
+        Text(
+            text = "${getDeltaString(delta)} ago",
+            modifier = modifier,
+            fontSize = 14.sp,
+            fontWeight = FontWeight(500),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+
+
+
+
+
+    /**
+     * How much time until a lesson starts in plaintext
+     * */
+    @Composable
+    fun TimeUntil(modifier: Modifier = Modifier) {
+        val delta = getDelta(LocalDateTime.now(), lesson.startTime)
+        Text(
+            text = "In ${getDeltaString(delta)}",
+            modifier = modifier,
+            fontSize = 14.sp,
+            fontWeight = FontWeight(500),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+
+
+
+
+
+    /**
+     * How much time is left of a lesson in plaintext
+     * */
+    @Composable
+    fun TimeLeft(modifier: Modifier = Modifier) {
+        val delta = getDelta(LocalDateTime.now(), lesson.endTime)
+        Text(
+            text = "${getDeltaString(delta)} left",
+            modifier = modifier,
+            fontSize = 14.sp,
+            fontWeight = FontWeight(500),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+
+
 
 
 
@@ -182,19 +296,92 @@ class Time(val lesson: Lesson) {
      * Only relevant if [showDelta] is true
      * */
     @Composable
-    private fun RawTimeWithDelta(modifier: Modifier = Modifier, time: LocalDateTime, showDelta: Boolean = true, showDeltaIfPassed: Boolean = false) {
+    private fun RawTimeWithDelta(
+        modifier: Modifier = Modifier,
+        time: LocalDateTime,
+        showDelta: Boolean = true,
+        showDeltaIfPassed: Boolean = false,
+        deltaPos: Int
+    ) {
 
         val delta = getDelta(LocalDateTime.now(), time)
 
+        if (!checkDelta(delta, showDelta, showDeltaIfPassed)) { return RawTime(time = time) }
+
+        return when (deltaPos) {
+            0 -> LeftDelta(modifier=modifier, delta = delta) { RawTime(time = time) }
+            1 -> TopDelta(modifier=modifier, delta = delta) { RawTime(time = time) }
+            2 -> RightDelta(modifier=modifier, delta = delta) { RawTime(time = time) }
+            3 -> BottomDelta(modifier=modifier, delta = delta) { RawTime(time = time) }
+            else -> {}
+        }
+    }
+
+    @Composable
+    fun LeftDelta(
+        modifier: Modifier = Modifier,
+        delta: Long,
+        rawTime: @Composable() (RowScope.() -> Unit)
+    ) {
         Row(
             modifier=modifier,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (checkDelta(delta, showDelta, showDeltaIfPassed)) {
-                RawDelta(delta = delta, fontWeight = 500)
-            }
+
+            RawDelta(delta = delta, fontWeight = 500)
             Spacer(modifier = Modifier.width(4.dp))
-            RawTime(time = time)
+            rawTime()
+        }
+    }
+
+    @Composable
+    fun TopDelta(
+        modifier: Modifier = Modifier,
+        delta: Long,
+        rawTime: @Composable() (RowScope.() -> Unit)
+    ) {
+        Row(
+            modifier=modifier,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            RawDelta(delta = delta, fontWeight = 500)
+            Spacer(modifier = Modifier.width(4.dp))
+            rawTime()
+        }
+    }
+
+    @Composable
+    fun RightDelta(
+        modifier: Modifier = Modifier,
+        delta: Long,
+        rawTime: @Composable() (RowScope.() -> Unit)
+    ) {
+        Row(
+            modifier=modifier,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            rawTime()
+            Spacer(modifier = Modifier.width(4.dp))
+            RawDelta(delta = delta, fontWeight = 500)
+        }
+    }
+
+    @Composable
+    fun BottomDelta(
+        modifier: Modifier = Modifier,
+        delta: Long,
+        rawTime: @Composable() (RowScope.() -> Unit)
+    ) {
+        Row(
+            modifier=modifier,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            rawTime()
+            Spacer(modifier = Modifier.width(4.dp))
+            RawDelta(delta = delta, fontWeight = 500)
         }
     }
 
