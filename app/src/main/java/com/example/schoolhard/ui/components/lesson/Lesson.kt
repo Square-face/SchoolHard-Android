@@ -89,7 +89,7 @@ class LessonView(val lesson: Lesson) {
                     Column(
                         horizontalAlignment = Alignment.End
                     ) {
-                        time.StartTime(deltaPos = 2)
+                        time.StartTime()
                         time.EndTime()
                     }
                 }
