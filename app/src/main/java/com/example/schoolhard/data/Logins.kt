@@ -59,25 +59,30 @@ class Login(val uuid: String, private val username: String, val appKey: String, 
  * A helper class for managing persistent storage on the device
  *
  * @param store SharedPreference store to use when saving login info
- * @property logins All currently stored logins
  * @property login The currently active login
  * */
 class Logins(private val store: SharedPreferences) {
     val login get() = getActiveLogin()
 
 
-    fun getLogins(): Set<Login> {
+
+
+
+    /**
+     * Get all currently saved logins
+     *
+     * @return set of all logins
+     * */
+    private fun getLogins(): Set<Login> {
         val uuids = getUUIDs()
-        val logins = mutableSetOf<Login>()
 
-        uuids.forEach {uuid ->
-            val login = getLogin(uuid)
-
-            logins.add(login)
-        }
+        val logins = uuids.map { getLogin(it) }
 
         return logins.toSet()
     }
+
+
+
 
 
     /**
@@ -93,6 +98,10 @@ class Logins(private val store: SharedPreferences) {
 
         return getLogin(uuid)
     }
+
+
+
+
 
     /**
      * Set the currently active login
@@ -150,6 +159,8 @@ class Logins(private val store: SharedPreferences) {
 
 
 
+
+
     /**
      * Store login in persistent storage
      *
@@ -167,6 +178,8 @@ class Logins(private val store: SharedPreferences) {
 
 
 
+
+
     /**
      * Get the uuid of the currently active login
      *
@@ -176,6 +189,10 @@ class Logins(private val store: SharedPreferences) {
         return getString("index")
     }
 
+
+
+
+
     /**
      * Set the uuid of the currently active login
      *
@@ -184,6 +201,8 @@ class Logins(private val store: SharedPreferences) {
     private fun setActiveUUID(uuid: String){
         storeString("index", uuid)
     }
+
+
 
 
 
@@ -198,6 +217,8 @@ class Logins(private val store: SharedPreferences) {
 
 
 
+
+
     /**
      * Save a new uuid to persistent storage
      *
@@ -207,6 +228,8 @@ class Logins(private val store: SharedPreferences) {
         Log.v("Logins - saveUUID", "Saving new uuid ($uuid)")
         addStringToSet("uuids", uuid)
     }
+
+
 
 
 
@@ -226,6 +249,8 @@ class Logins(private val store: SharedPreferences) {
 
 
 
+
+
     /**
      * Get a string stored in persistent storage
      *
@@ -239,6 +264,8 @@ class Logins(private val store: SharedPreferences) {
 
         return result
     }
+
+
 
 
 
@@ -264,6 +291,8 @@ class Logins(private val store: SharedPreferences) {
 
 
 
+
+
     /**
      * Get a set of strings from persistent storage
      *
@@ -277,6 +306,8 @@ class Logins(private val store: SharedPreferences) {
 
         return result
     }
+
+
 
 
 
@@ -297,6 +328,8 @@ class Logins(private val store: SharedPreferences) {
 
 
 
+
+
     /**
      * Save integer to persistent storage
      * IMPORTANT: This function does not take into account if there already exists data.
@@ -311,6 +344,8 @@ class Logins(private val store: SharedPreferences) {
         editor.putInt(address, value)
         editor.commit()
     }
+
+
 
 
 
