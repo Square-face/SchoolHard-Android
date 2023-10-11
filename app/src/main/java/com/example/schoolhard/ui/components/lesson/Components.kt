@@ -160,7 +160,13 @@ class Time(val lesson: Lesson) {
         showDeltaIfPassed: Boolean = false,
         @IntRange(from=0, to=3) deltaPos: Int = 0
     ) {
-        RawTimeWithDelta(modifier = modifier, time = lesson.startTime, showDelta = showDelta, showDeltaIfPassed = showDeltaIfPassed, deltaPos=deltaPos)
+        RawTimeWithDelta(
+            modifier = modifier,
+            time = lesson.startTime,
+            showDelta = showDelta,
+            showDeltaIfPassed = showDeltaIfPassed,
+            deltaPos=deltaPos
+        )
     }
 
 
@@ -363,7 +369,7 @@ class Time(val lesson: Lesson) {
         ) {
 
             rawTime()
-            Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(8.dp))
             RawDelta(delta = delta, fontWeight = 500)
         }
     }
