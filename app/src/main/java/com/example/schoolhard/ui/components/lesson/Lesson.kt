@@ -121,12 +121,21 @@ class LessonView(val lesson: Lesson) {
                 .clip(RoundedCornerShape(15.dp)),
             contentAlignment = Alignment.CenterStart
         ){
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(lesson.progress)
-                    .background(Color(0xFF13B013))
-            )
+            if (lesson.progress == 1f) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(lesson.progress)
+                        .background(Color(0x7013B013))
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxHeight()
+                        .fillMaxWidth(lesson.progress)
+                        .background(Color(0xFF13B013))
+                )
+            }
 
             Row(
                 modifier = Modifier
