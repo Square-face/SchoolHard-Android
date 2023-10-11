@@ -223,10 +223,12 @@ class Time(val lesson: Lesson) {
         if (lesson.startTime.isAfter(now)) { TimeUntil(modifier = modifier); return }
 
         // lesson has ended
-        if (lesson.endTime.isBefore(now)) { TimeAgo(modifier = modifier); return }
+        if (lesson.endTime.isBefore(now) && lesson.endTime.plusMinutes(10).isAfter(now)) { TimeAgo(modifier = modifier); return }
 
         // lesson is happening right now
-        TimeLeft(modifier = modifier)
+        if (lesson.startTime.isBefore(now) && lesson.endTime.isAfter(now)) { TimeLeft(modifier = modifier); return }
+
+        Text(text = "")
     }
 
 
