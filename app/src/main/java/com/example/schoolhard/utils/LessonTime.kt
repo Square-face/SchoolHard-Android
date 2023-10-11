@@ -1,14 +1,9 @@
 package com.example.schoolhard.utils
 
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.Date
-import kotlin.math.floor
-
-const val MillisInSec   = (1000)
-const val MillisInMin   = (MillisInSec*60)
-const val MillisInHour  = (MillisInMin*60)
-const val MillisInDay   = (MillisInHour*24)
+import kotlin.math.absoluteValue
 
 fun getDeltaToNow(time: LocalDateTime): Long{
     /**Get time delta in milliseconds from [time] to now
@@ -21,47 +16,45 @@ fun getDelta(from: LocalDateTime, to: LocalDateTime): Long{
     return ChronoUnit.MILLIS.between(from, to)
 }
 
-fun getDeltaString(t: Long): String{
-    var time = t
 
-    val days = floor((time / MillisInDay).toDouble()).toInt()
-    time -= (days * MillisInDay).toLong()
 
-    val hours = floor((time / MillisInHour).toDouble()).toInt()
-    time -= (hours * MillisInHour).toLong()
+/**
+ * convert time delta in milliseconds to string
+ * negative deltas will be converted to positive
+ * A maximum of two values are shown at once.
+ * for example if the delta is 1 day 2 hours 3 minutes 4 seconds the result will be "1d 2h"
+ *
+ * @param delta time delta in milliseconds
+ * @return time delta in string format
+ * */
+fun getDeltaString(delta: Long): String{
+    val duration = Duration.ofMillis(delta.absoluteValue)
 
-    val minutes = floor((time / MillisInMin).toDouble()).toInt()
-    time -= (minutes * MillisInMin).toLong()
+    val days = duration.toDays()
+    val hours = (duration.toHours() % 24)
+    val minutes = (duration.toMinutes() % 60)
+    val seconds = (duration.seconds % 60)
 
-    val seconds = floor((time / MillisInSec).toDouble()).toInt()
-    time -= (seconds * MillisInSec).toLong()
+    var output = ""
 
-    if (days==0 && hours == 0 && minutes == 0){
-        if (seconds == 0){return "now!"}
-        return "$seconds sec"
+    if (days > 0) {
+        output += "$days d "
     }
-    if (days==0 && hours == 0 && minutes == 1){
-        return "60 sec"
+    if (hours > 0) {
+        output += "$hours h "
     }
-
-    if (days > 1){
-        return "$days days"
+    if (minutes > 0 && days == 0L) {
+        output += "$minutes m "
     }
-
-    var result = ""
-
-    if (days != 0){
-        result += "$days days "
-    }
-    if (hours != 0){
-        result += "$hours h "
-    }
-    if (minutes != 0 && days == 0){
-        result += "$minutes min "
+    if (seconds > 0 && days == 0L && hours == 0L && minutes < 5) {
+        output += "$seconds s "
     }
 
-    return result.dropLast(1)
+    return output.trim()
 }
+
+
+
 
 fun getProgress(startTime: LocalDateTime, now: LocalDateTime, endTime: LocalDateTime): Float {
     val lessonTime = getDelta(startTime, endTime)
