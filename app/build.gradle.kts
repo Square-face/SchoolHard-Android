@@ -1,3 +1,11 @@
+import java.util.Properties
+import com.android.build.api.variant.BuildConfigField
+import com.android.build.gradle.internal.packaging.fromProjectProperties
+
+val props = Properties()
+
+props.load(file("secret.properties").inputStream())
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -18,7 +26,15 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        props.getProperty("APP_CENTER_SECRET")?.let {
+            print("Setting APP_CENTER_SECRET to $it")
+            buildConfigField("String", "APP_CENTER_SECRET", it)
+        }?:run {
+            print("APP_CENTER_SECRET not set, setting to empty string")
+            buildConfigField("String", "APP_CENTER_SECRET", "")
+        }
     }
+
 
     buildTypes {
         release {
@@ -38,6 +54,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
@@ -49,8 +66,11 @@ android {
     }
 }
 
-dependencies {
+val appCenterSdkVersion = "4.4.5"
 
+dependencies {
+    implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
+    implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
     implementation("androidx.core:core-ktx:1.9.0")
     implementation("androidx.compose.material3:material3-window-size-class:1.0.0-alpha01")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.1")
