@@ -13,13 +13,13 @@ pool:
 steps:
 - task: DownloadSecureFile@1
   inputs:
-    secureFile: 'gradle.properties'
+    secureFile: 'secret.properties'
 
 - task: CopyFiles@2
   inputs:
-    Contents: 'gradle.properties'
+    Contents: 'secret.properties'
     TargetFolder: 'app'
-    
+
 - task: Gradle@3
   inputs:
     workingDirectory: 'app'
