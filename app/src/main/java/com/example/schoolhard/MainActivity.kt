@@ -14,10 +14,19 @@ import com.example.schoolhard.API.SchoolSoft.SchoolSoftAPI
 import com.example.schoolhard.data.Logins
 import com.example.schoolhard.database.Database
 import com.example.schoolhard.ui.SchoolHardApp
+import com.microsoft.appcenter.AppCenter
+import com.microsoft.appcenter.analytics.Analytics
+import com.microsoft.appcenter.crashes.Crashes
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        AppCenter.start(
+            application, BuildConfig.APP_CENTER_SECRET,
+            Analytics::class.java, Crashes::class.java
+        )
+
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {

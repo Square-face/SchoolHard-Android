@@ -16,3 +16,5 @@ local.properties
 /app/release/output-metadata.json
 /app/release/app-release.apk
 /test.jks
+gradle.properties
+/app/secret.properties
