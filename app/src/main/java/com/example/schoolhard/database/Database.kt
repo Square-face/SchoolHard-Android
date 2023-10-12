@@ -26,7 +26,7 @@ private val dateTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("uuu
 private val OLD_TABLES = listOf("schema")
 
 class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
-    SQLiteOpenHelper(context, "schema", factory, 21) {
+    SQLiteOpenHelper(context, "schema", factory, 23) {
 
     private val utils = Utils()
 
@@ -118,27 +118,29 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * */
     fun updateSchedule(api: API, finishedCallback: (Boolean) -> Unit = {}) {
         Log.i("Database - UpdateSchedule", "Updating schema")
-        val db = this.writableDatabase
 
 
-        if (db.isDbLockedByCurrentThread) {
-            Log.w("Database - UpdateSchedule", "Database looked")
-            finishedCallback(false)
-            return
-        }
+
 
 
         api.lessons({ finishedCallback(false) }) {response ->
+
+            val db = this.writableDatabase
+
+            if (db.isDbLockedByCurrentThread) {
+                Log.w("Database - UpdateSchedule", "Database looked")
+                finishedCallback(false)
+                return@lessons
+            }
 
             db.beginTransaction()
 
             dropAllTables(db)
             onCreate(db)
 
+            Log.d("Database - UpdateSchedule", "Caching ${response.size} lessons")
+
             response.forEach {lesson ->
-                Log.v("Database - UpdateSchedule", "Caching lesson: ${lesson.occasion.subject.name} id: ${lesson.id}")
-
-
                 createLessonIfNotExist(db, lesson)
                 createOccasionIfNotExist(db, lesson.occasion)
                 createSubjectIfNotExist(db, lesson.occasion.subject)
@@ -207,18 +209,18 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @return If a new subject was created
      * */
     private fun createSubjectIfNotExist(db: SQLiteDatabase, subject: Subject): Boolean {
-        Log.v("Database - createSubjectIfNotExist", "Subject ${subject.name} - ${subject.id}")
 
         val cursor = db.rawQuery(
-            "SELECT * FROM ${Schema.Subject.table} WHERE ${Schema.Subject.Columns.uuid} = ?",
-            arrayOf(subject.id.toString()))
+            "SELECT * FROM ${Schema.Subject.table} WHERE ${Schema.Subject.Columns.subjectId} = ?",
+            arrayOf(subject.subjectId.toString()))
         val count = cursor.count
         cursor.close()
 
         if (count > 0) {
-            Log.d("Database - createSubjectIfNotExist", "Subject ${subject.id} already exists")
             return false
         }
+
+        Log.v("Database - createSubjectIfNotExist", "Subject ${subject.id} doesn't exist")
 
         storeSubject(db, subject)
         return true
@@ -236,7 +238,6 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @return True means the lesson already existed, false means it had to be saved
      * */
     private fun createOccasionIfNotExist(db: SQLiteDatabase, occasion: Occasion):Boolean {
-        Log.v("Database - createOccasionIfNotExist", "Occasion ${occasion.subject.name} at ${occasion.startTime.format(timeFormat)} on ${occasion.dayOfWeek.name}, ${occasion.id}")
 
         val cursor = db.rawQuery(
             "SELECT * FROM ${Schema.Occasion.table} WHERE ${Schema.Occasion.Columns.uuid} = ?",
@@ -247,9 +248,11 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         cursor.close()
 
         if (count > 0) {
-            Log.d("Database - createOccasionIfNotExist", "Occasion ${occasion.id} already exists")
             return true
         }
+
+
+        Log.v("Database - createOccasionIfNotExist", "Occasion ${occasion.id} doesn't exist")
 
         storeOccasion(db, occasion)
         return false
@@ -266,7 +269,6 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @return True means the lesson already existed, false means it had to be saved
      * */
     private fun createLessonIfNotExist(db: SQLiteDatabase, lesson: Lesson): Boolean {
-        Log.v("Database - createLessonIfNotExist", "Lesson ${lesson.occasion.subject.name} at ${lesson.date.atTime(lesson.occasion.startTime).format(dateTimeFormat)}, ${lesson.id}")
 
         val cursor = db.rawQuery(
             "SELECT * FROM ${Schema.Lesson.table} WHERE ${Schema.Lesson.Columns.uuid} = ?",
@@ -276,7 +278,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         cursor.close()
 
         if (count > 0) {
-            Log.d("Database - createOccasionIfNotExist", "Occasion ${lesson.id} already exists")
+            Log.d("Database - createLessonIfNotExist", "Lesson ${lesson.id} already exists")
             return true
         }
 
@@ -430,7 +432,6 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @return parsed occasion object or null if no occasion is found
      * */
     fun getOccasion(uuid: String, parent: Subject): Occasion? {
-        Log.v("Database - getOccasion", "Fetching occasion with uuid $uuid")
 
         val db = this.readableDatabase
 
@@ -449,6 +450,8 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         return occasion
     }
 
+
+
     /**
      * Get a single subject from the database
      *
@@ -457,7 +460,6 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @return parsed subject object or null if no subject is found
      * */
     fun getSubject(uuid: String): Subject? {
-        Log.v("Database - getSubject", "Fetching subject with uuid $uuid")
 
         val db = this.readableDatabase
 
@@ -466,14 +468,15 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         val cursor = db.rawQuery(query.query, query.args)
 
         // null check
-        if (cursor.count != 1) { return null }
+        if (cursor.count != 1) {
+            Log.v("Database - getSubject", "Subject $uuid not found (${cursor.count}, ${query.query}, ${query.args})")
+            return null
+        }
 
         // parse
         cursor.moveToFirst()
         val subject = utils.parseSubject(cursor)
         cursor.close()
-
-        Log.v("Database - getSubject", "Got subject ${subject.name}")
 
         return subject
     }
@@ -490,7 +493,6 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      * @param subject Subject to save
      * */
     fun storeSubject(db: SQLiteDatabase, subject: Subject) {
-        Log.d("Database - Subject", "Storing subject (${subject.id})")
 
         val values = ContentValues()
 
