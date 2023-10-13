@@ -69,6 +69,7 @@ android {
 val appCenterSdkVersion = "4.4.5"
 
 dependencies {
+    implementation("com.microsoft.appcenter:appcenter-distribute:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-analytics:${appCenterSdkVersion}")
     implementation("com.microsoft.appcenter:appcenter-crashes:${appCenterSdkVersion}")
     implementation("androidx.core:core-ktx:1.9.0")
