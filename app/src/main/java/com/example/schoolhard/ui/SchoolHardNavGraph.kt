@@ -74,7 +74,7 @@ fun SchoolHardNavGraph(
             composable(
                 route = SchoolHardDestinations.HOME_ROUTE,
             ) {
-                Text(modifier = Modifier.padding(30.dp), text="Home")
+                Text(modifier = Modifier.padding(30.dp), text="PENIS")
             }
             composable(SchoolHardDestinations.SCHEMA_ROUTE) {
                 SchemaRoute(api = api, database = database)
