@@ -44,7 +44,6 @@ fun SchoolHardNavGraph(
     navController: NavHostController = rememberNavController(),
     openDrawer: () -> Unit = {},
     startDestination: String = SchoolHardDestinations.HOME_ROUTE,
-    logins: Logins,
 ) {
     Column(modifier
 
@@ -87,11 +86,11 @@ fun SchoolHardNavGraph(
             startDestination = startDestination,
             modifier = modifier
         ) {
-            
+
             composable(SchoolHardDestinations.HOME_ROUTE) {
-                Text(modifier = Modifier.padding(30.dp), text="Home")
+                Text(modifier = Modifier.padding(30.dp), text = "Home")
             }
-            
+
             composable(SchoolHardDestinations.SCHEDULE_ROUTE) {
                 SchemaRoute(api = api, database = database)
             }
@@ -99,15 +98,6 @@ fun SchoolHardNavGraph(
             val pageArg = navArgument("page") {
                 type = NavType.StringType
             }
-
-            composable(SchoolHardDestinations.SETTINGS_ROUTE) {
-                Settings(
-                    navController = navController,
-                    path=null,
-                    logins = logins,
-                    database = database,
-                    api = api
-                )}
 
             composable(
                 SchoolHardDestinations.SETTINGS_ROUTE+"/{page}",
