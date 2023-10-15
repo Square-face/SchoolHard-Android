@@ -1,7 +1,7 @@
 # SchoolHard
 
 ## Description
-SchoolHard is a project to remake SchoolSofts mobile apps. While it continues to use the SchoolSoft API, it implements its own user interface along with an on-device caching database. This allows it to load faster and function offline, providing a more user-friendly and reliable experience.
+SchoolHard is a project to remake SchoolSofts mobile apps. This repo is specificaly for the android version of SchoolHard. While it continues to use the SchoolSoft API, it implements its own user interface along with an on-device caching database. This allows it to load faster and function offline, providing a more user-friendly and reliable experience.
 
 ## Features
 * Custom user interface for easier navigation
@@ -10,13 +10,12 @@ SchoolHard is a project to remake SchoolSofts mobile apps. While it continues to
 * Seamless integration with SchoolSoft's API
 
 ## Installation
-SchoolHard is currently available for installation via AppCenter. You can choose between the stable release or the beta release:
+The android version of SchoolHard is currently available for installation via AppCenter. You can choose between the stable release or the beta release:
 
 - [Stable Release](https://install.appcenter.ms/orgs/sq8/apps/schoolhard/distribution_groups/stable)
 - [Beta Release](https://install.appcenter.ms/orgs/sq8/apps/schoolhard/distribution_groups/beta)
 
-## Usage
-(Provide detailed steps on how to use your app. Include screenshots or videos if possible to guide users visually)
+The IOS app has not start development yet. If you wish to help, please visit [the repo](https://github.com/Square-face/SchoolHard-IOS) and get started
 
 ## How to Contribute
 
@@ -32,7 +31,7 @@ We welcome contributions from the community. Here's how you can help:
 
 Please also note our [Code of Conduct](CODE_OF_CONDUCT.md), which outlines our expectations for participants within our community.
 
-For more detailed instructions, check out our [Contributing Guide](CONTRIBUTION.md).
+For more detailed instructions, check out our [Contributing Guide](CONTRIBUTING.md).
 
 ## License
 MIT license
