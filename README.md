@@ -35,7 +35,7 @@ Please also note our [Code of Conduct](docs/CodeOfConduct.md), which outlines ou
 For more detailed instructions, check out our [Contributing Guide](docs/ContributionGuide.md).
 
 ## License
-(Include the type of license your project is under. This informs other developers what they can and can't do with your project)
+MIT license
 
 ## Contact
-(Provide your contact information so other developers can reach out to you with questions, suggestions, or contributions)
+If you want to contact me directly do so with linus.michelsson@gmail.com
