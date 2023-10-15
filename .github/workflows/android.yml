@@ -17,7 +17,7 @@ jobs:
         cache: gradle
 
     - name: Add appcenter secret
-      run: echo "APPCENTER_SECRET = \"${{ secrets.APP_CENTER_SECRET }}\"" >> app/secret.properties
+      run: echo "APP_CENTER_SECRET = \"${{ secrets.APP_CENTER_SECRET }}\"" >> app/secret.properties
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     - name: Build project
