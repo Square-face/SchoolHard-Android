@@ -1,7 +1,7 @@
 # SchoolHard
 
 ## Description
-SchoolHard is an Android app designed to replace SchoolSoft. While it continues to use the SchoolSoft API, it implements its own user interface along with an on-device caching database. This allows it to load faster and function offline, providing a more user-friendly and reliable experience.
+SchoolHard is a project to remake SchoolSofts mobile apps. While it continues to use the SchoolSoft API, it implements its own user interface along with an on-device caching database. This allows it to load faster and function offline, providing a more user-friendly and reliable experience.
 
 ## Features
 * Custom user interface for easier navigation
@@ -30,9 +30,9 @@ We welcome contributions from the community. Here's how you can help:
 
 4. **Submit a pull request**: Push your changes to Azure and submit a pull request proposing your changes.
 
-Please also note our [Code of Conduct](docs/CodeOfConduct.md), which outlines our expectations for participants within our community.
+Please also note our [Code of Conduct](CODE_OF_CONDUCT.md), which outlines our expectations for participants within our community.
 
-For more detailed instructions, check out our [Contributing Guide](docs/ContributionGuide.md).
+For more detailed instructions, check out our [Contributing Guide](CONTRIBUTION.md).
 
 ## License
 MIT license
