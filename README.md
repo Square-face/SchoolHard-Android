@@ -27,7 +27,7 @@ We welcome contributions from the community. Here's how you can help:
 
 3. **Commit your changes**: Once you're satisfied with your changes, commit them with a clear and descriptive commit message.
 
-4. **Submit a pull request**: Push your changes to Azure and submit a pull request proposing your changes.
+4. **Submit a pull request**: Push your changes to Github and submit a pull request proposing your changes.
 
 Please also note our [Code of Conduct](CODE_OF_CONDUCT.md), which outlines our expectations for participants within our community.
 
