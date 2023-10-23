@@ -30,6 +30,7 @@ import androidx.navigation.compose.rememberNavController
 import com.example.schoolhard.API.API
 import com.example.schoolhard.R
 import com.example.schoolhard.database.Database
+import com.example.schoolhard.ui.home.Home
 import com.example.schoolhard.ui.schema.SchemaRoute
 
 @Composable
@@ -71,10 +72,8 @@ fun SchoolHardNavGraph(
             startDestination = startDestination,
             modifier = modifier
         ) {
-            composable(
-                route = SchoolHardDestinations.HOME_ROUTE,
-            ) {
-                Text(modifier = Modifier.padding(30.dp), text="PENIS")
+            composable(route = SchoolHardDestinations.HOME_ROUTE,) {
+                Home(api = api, database = database)
             }
             composable(SchoolHardDestinations.SCHEMA_ROUTE) {
                 SchemaRoute(api = api, database = database)
