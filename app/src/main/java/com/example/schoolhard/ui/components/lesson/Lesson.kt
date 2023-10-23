@@ -40,10 +40,10 @@ class LessonView(val lesson: Lesson) {
 
 
     /**
-     * Medium sized lesson view model
+     * Large lesson view model
      * */
     @Composable
-    fun Medium(modifier: Modifier = Modifier) {
+    fun Large(modifier: Modifier = Modifier) {
 
         var progress by remember { mutableStateOf(Progress(lesson.progress)) }
         var time by remember { mutableStateOf(Time(lesson)) }
@@ -97,6 +97,73 @@ class LessonView(val lesson: Lesson) {
         }
     }
 
+
+
+    /**
+     * Medium sized lesson view model
+     *
+     * ===== Progress =====
+     *     Name | Location
+     * Duration | OneLineInfo
+     * */
+    @Composable
+    fun Medium(modifier: Modifier = Modifier) {
+
+        var progress by remember { mutableStateOf(Progress(lesson.progress)) }
+        var time by remember { mutableStateOf(Time(lesson)) }
+        val meta = Meta(lesson)
+
+        // Update progress and time every second
+        LaunchedEffect(lesson) {
+            while(true) {
+                progress = Progress(lesson.progress)
+                time = Time(lesson)
+                delay(1000)
+            }
+        }
+
+        Column(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(55.dp)
+                .background(MaterialTheme.colorScheme.secondary, RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(8.dp))
+        ) {
+
+            progress.Thin()
+
+            // content
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(7.dp, 2.dp),
+            ) {
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        meta.Name()
+                        time.Duration(weight = 400)
+                    }
+
+                    Column(
+                        horizontalAlignment = Alignment.End
+                    ) {
+                        meta.Location()
+                        time.OneLineInfo()
+                    }
+                }
+            }
+        }
+    }
+
+
+
+
+
     /**
      * Thin lesson view model
      * */
@@ -122,6 +189,7 @@ class LessonView(val lesson: Lesson) {
             contentAlignment = Alignment.CenterStart
         ){
             if (lesson.progress == 1f) {
+                // If lesson is over, reduce the alpha layer
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()
@@ -129,6 +197,7 @@ class LessonView(val lesson: Lesson) {
                         .background(Color(0x7013B013))
                 )
             } else {
+
                 Box(
                     modifier = Modifier
                         .fillMaxHeight()

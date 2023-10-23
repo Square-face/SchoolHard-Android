@@ -22,7 +22,7 @@ fun Schema(modifier: Modifier = Modifier, lessons: List<Lesson>) {
             .fillMaxSize()
     ) {
         items(lessons) {
-            LessonView(lesson = it).Medium()
+            LessonView(lesson = it).Large()
         }
     }
 }
