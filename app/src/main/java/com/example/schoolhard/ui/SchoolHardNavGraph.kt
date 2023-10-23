@@ -33,8 +33,8 @@ import com.example.schoolhard.API.API
 import com.example.schoolhard.R
 import com.example.schoolhard.data.Logins
 import com.example.schoolhard.database.Database
-import com.example.schoolhard.ui.pages.schema.SchemaRoute
-import com.example.schoolhard.ui.pages.settings.Settings
+import com.example.schoolhard.ui.home.Home
+import com.example.schoolhard.ui.schema.SchemaRoute
 
 @Composable
 fun SchoolHardNavGraph(
@@ -86,9 +86,8 @@ fun SchoolHardNavGraph(
             startDestination = startDestination,
             modifier = modifier
         ) {
-
-            composable(SchoolHardDestinations.HOME_ROUTE) {
-                Text(modifier = Modifier.padding(30.dp), text = "Home")
+            composable(route = SchoolHardDestinations.HOME_ROUTE,) {
+                Home(api = api, database = database)
             }
 
             composable(SchoolHardDestinations.SCHEDULE_ROUTE) {
