@@ -280,7 +280,7 @@ class Utils(private val database: Database) {
                 if (after != null) {
                     // unknowns: date, startTime, date again
 
-                    query += " ((${Schema.Lesson.Columns.date} = ? AND ${Schema.Lesson.Columns.startTime} >= ?) OR ${Schema.Lesson.Columns.date} > ?)"
+                    query += " ((${Schema.Lesson.Columns.date} = ? AND ${Schema.Lesson.Columns.startTime} > ?) OR ${Schema.Lesson.Columns.date} > ?)"
                     args.add(after.toLocalDate().toEpochDay().toString())
                     args.add(after.toLocalTime().toSecondOfDay().toString())
                     args.add(after.toLocalDate().toEpochDay().toString())
@@ -291,7 +291,7 @@ class Utils(private val database: Database) {
                     if (after != null) { query += " AND" }
 
                     // unknowns: date, endTime
-                    query += " (( ${Schema.Lesson.Columns.date} = ? AND ${Schema.Lesson.Columns.endTime} <= ?) OR ${Schema.Lesson.Columns.date} < ?)"
+                    query += " (( ${Schema.Lesson.Columns.date} = ? AND ${Schema.Lesson.Columns.endTime} < ?) OR ${Schema.Lesson.Columns.date} < ?)"
                     args.add(before.toLocalDate().toEpochDay().toString())
                     args.add(before.toLocalTime().toSecondOfDay().toString())
                     args.add(before.toLocalDate().toEpochDay().toString())
