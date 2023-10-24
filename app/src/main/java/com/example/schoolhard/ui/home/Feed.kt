@@ -46,7 +46,7 @@ fun Feed(modifier: Modifier = Modifier, previous: Lesson?, current: Lesson?, nex
         .fillMaxWidth()
         .padding(top = 40.dp, bottom = 0.dp, start = 20.dp, end = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(15.dp, Alignment.Top)
+        verticalArrangement = Arrangement.spacedBy(5.dp, Alignment.Top)
     ){
 
         val thiner = Modifier.fillMaxWidth(0.9f)
