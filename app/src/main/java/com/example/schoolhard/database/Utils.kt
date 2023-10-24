@@ -292,8 +292,8 @@ class Utils(private val database: Database) {
                     // unknowns: date, endTime
                     query += " (( ${Schema.Lesson.Columns.date} = ? AND ${Schema.Lesson.Columns.endTime} <= ?) OR ${Schema.Lesson.Columns.date} < ?)"
                     args.add(before.toLocalDate().toEpochDay().toString())
-                    args.add(before.toLocalDate().toEpochDay().toString())
                     args.add(before.toLocalTime().toSecondOfDay().toString())
+                    args.add(before.toLocalDate().toEpochDay().toString())
                 }
 
                 return Query(query, args.toTypedArray())
