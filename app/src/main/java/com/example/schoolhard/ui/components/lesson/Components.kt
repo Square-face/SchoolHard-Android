@@ -482,7 +482,7 @@ class Time(val lesson: Lesson) {
 
 
 
-class Recess(private val start: LocalDateTime, private val end: LocalDateTime) {
+class Recess(private val start: LocalDateTime, end: LocalDateTime) {
 
     private val duration = Duration.between(start, end)
 
@@ -502,7 +502,7 @@ class Recess(private val start: LocalDateTime, private val end: LocalDateTime) {
         // progress bars
         var progress by remember { mutableStateOf(getDelta(start, LocalDateTime.now()).toFloat() / duration.toMillis()) }
         val progress1 = Progress((progress*2).coerceIn(0f, 1f))
-        val progress2 = Progress(((progress*2)-0.5f).coerceIn(0f, 1f))
+        val progress2 = Progress(((progress*2)-1f).coerceIn(0f, 1f))
 
         LaunchedEffect(key1 = true) {
             while (true) {
