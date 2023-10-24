@@ -264,7 +264,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
 
         // make and execute request
         val query = Utils.Query.lessonQuery(before = LocalDateTime.now())
-        val cursor = db.rawQuery(query.query + " ORDER BY ${Schema.Lesson.Columns.date} DESC, ${Schema.Lesson.Columns.startTime} DESC", query.args)
+        val cursor = db.rawQuery(query.query + " ORDER BY ${Schema.Lesson.Columns.date} DESC, ${Schema.Lesson.Columns.endTime} DESC", query.args)
 
         // null check
         if (cursor.count == 0) { return null }
