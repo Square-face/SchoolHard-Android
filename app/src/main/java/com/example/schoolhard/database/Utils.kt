@@ -49,7 +49,7 @@ class Utils {
         return Lesson(
             occasion,
             cursor.getInt(Schema.Lesson.Columns.week.index),
-            LocalDate.ofYearDay(2000, 1).plusDays(cursor.getInt(Schema.Lesson.Columns.date.index).toLong()),
+            LocalDate.ofEpochDay(cursor.getInt(Schema.Lesson.Columns.date.index).toLong()),
             UUID.fromString(cursor.getString(Schema.Lesson.Columns.uuid.index))
         )
     }
@@ -77,8 +77,8 @@ class Utils {
             cursor.getInt(Schema.Occasion.Columns.occasionId.index),
             subject,
             Location(cursor.getString(Schema.Occasion.Columns.location.index)),
-            LocalTime.MIN.plusMinutes(cursor.getInt(Schema.Occasion.Columns.startTime.index).toLong()),
-            LocalTime.MIN.plusMinutes(cursor.getInt(Schema.Occasion.Columns.endTime.index).toLong()),
+            LocalTime.MIN.plusSeconds(cursor.getInt(Schema.Occasion.Columns.startTime.index).toLong()),
+            LocalTime.MIN.plusSeconds(cursor.getInt(Schema.Occasion.Columns.endTime.index).toLong()),
             DayOfWeek.of(cursor.getInt(Schema.Occasion.Columns.dayOfWeek.index))
         )
     }
