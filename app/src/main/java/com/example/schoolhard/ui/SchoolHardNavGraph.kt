@@ -20,20 +20,20 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.schoolhard.API.API
 import com.example.schoolhard.R
 import com.example.schoolhard.database.Database
 import com.example.schoolhard.ui.pages.schema.SchemaRoute
 import com.example.schoolhard.ui.pages.settings.Settings
-import java.util.Locale
 
 @Composable
 fun SchoolHardNavGraph(
@@ -93,9 +93,19 @@ fun SchoolHardNavGraph(
             composable(SchoolHardDestinations.SCHEDULE_ROUTE) {
                 SchemaRoute(api = api, database = database)
             }
-            
+
+            val pageArg = navArgument("page") {
+                type = NavType.StringType
+            }
+
             composable(SchoolHardDestinations.SETTINGS_ROUTE) {
-                Settings()
+                Settings(navController = navController, path=null)}
+
+            composable(
+                SchoolHardDestinations.SETTINGS_ROUTE+"/{page}",
+                listOf(pageArg)
+            ) { backStackEntry ->
+                Settings(navController = navController, path = backStackEntry.arguments?.getString("page"))
             }
         }
     }
