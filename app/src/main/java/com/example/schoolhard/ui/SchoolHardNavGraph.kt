@@ -34,12 +34,14 @@ import com.example.schoolhard.R
 import com.example.schoolhard.data.Logins
 import com.example.schoolhard.database.Database
 import com.example.schoolhard.ui.home.Home
-import com.example.schoolhard.ui.schema.SchemaRoute
+import com.example.schoolhard.ui.pages.settings.Settings
+import com.example.schoolhard.ui.pages.schema.SchemaRoute
 
 @Composable
 fun SchoolHardNavGraph(
     api: API,
     database: Database,
+    logins: Logins,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     openDrawer: () -> Unit = {},
@@ -94,6 +96,16 @@ fun SchoolHardNavGraph(
                 SchemaRoute(api = api, database = database)
             }
 
+            composable(SchoolHardDestinations.SETTINGS_ROUTE) {
+                Settings(
+                    navController = navController,
+                    path = null,
+                    logins = logins,
+                    database = database,
+                    api = api,
+                )
+            }
+
             val pageArg = navArgument("page") {
                 type = NavType.StringType
             }
@@ -107,7 +119,7 @@ fun SchoolHardNavGraph(
                     path = backStackEntry.arguments?.getString("page"),
                     logins = logins,
                     database = database,
-                    api = api
+                    api = api,
                 )
             }
         }
