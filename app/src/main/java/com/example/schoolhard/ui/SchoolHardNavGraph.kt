@@ -31,6 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.schoolhard.API.API
 import com.example.schoolhard.R
+import com.example.schoolhard.data.Logins
 import com.example.schoolhard.database.Database
 import com.example.schoolhard.ui.pages.schema.SchemaRoute
 import com.example.schoolhard.ui.pages.settings.Settings
@@ -43,6 +44,7 @@ fun SchoolHardNavGraph(
     navController: NavHostController = rememberNavController(),
     openDrawer: () -> Unit = {},
     startDestination: String = SchoolHardDestinations.HOME_ROUTE,
+    logins: Logins,
 ) {
     Column(modifier
 
@@ -99,13 +101,25 @@ fun SchoolHardNavGraph(
             }
 
             composable(SchoolHardDestinations.SETTINGS_ROUTE) {
-                Settings(navController = navController, path=null)}
+                Settings(
+                    navController = navController,
+                    path=null,
+                    logins = logins,
+                    database = database,
+                    api = api
+                )}
 
             composable(
                 SchoolHardDestinations.SETTINGS_ROUTE+"/{page}",
                 listOf(pageArg)
             ) { backStackEntry ->
-                Settings(navController = navController, path = backStackEntry.arguments?.getString("page"))
+                Settings(
+                    navController = navController,
+                    path = backStackEntry.arguments?.getString("page"),
+                    logins = logins,
+                    database = database,
+                    api = api
+                )
             }
         }
     }

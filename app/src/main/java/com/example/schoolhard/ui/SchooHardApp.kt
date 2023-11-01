@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.schoolhard.API.API
+import com.example.schoolhard.data.Logins
 import com.example.schoolhard.database.Database
 import com.example.schoolhard.ui.theme.SchoolHardTheme
 import kotlinx.coroutines.launch
@@ -29,6 +30,7 @@ fun SchoolHardApp(
     widthSizeClass: WindowWidthSizeClass,
     api: API,
     database: Database,
+    logins: Logins,
 ) {
     SchoolHardTheme {
         val navController = rememberNavController()
@@ -38,9 +40,9 @@ fun SchoolHardApp(
 
         val coroutineScope = rememberCoroutineScope()
 
+        val start = SchoolHardDestinations.HOME_ROUTE
         val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute =
-            navBackStackEntry?.destination?.route ?: SchoolHardDestinations.HOME_ROUTE
+        val currentRoute = navBackStackEntry?.destination?.route ?: start
 
         val isExpandedScreen = widthSizeClass == WindowWidthSizeClass.Expanded
         val sizeAwareDrawerState = rememberSizeAwareDrawerState(isExpandedScreen)
@@ -65,7 +67,9 @@ fun SchoolHardApp(
                 SchoolHardNavGraph(
                     api = api,
                     database = database,
+                    logins = logins,
                     navController = navController,
+                    startDestination = start,
                     openDrawer = { coroutineScope.launch { sizeAwareDrawerState.open() } },
                 )
             }

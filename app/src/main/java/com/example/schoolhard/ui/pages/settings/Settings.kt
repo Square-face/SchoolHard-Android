@@ -9,12 +9,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.example.schoolhard.API.API
+import com.example.schoolhard.data.Logins
+import com.example.schoolhard.database.Database
 import com.example.schoolhard.ui.SchoolHardDestinations
 
 
 @OptIn(ExperimentalStdlibApi::class)
 @Composable
-fun Settings(modifier: Modifier = Modifier, navController: NavHostController, path: String?) {
+fun Settings(
+    modifier: Modifier = Modifier,
+    navController: NavHostController,
+    path: String?,
+    logins: Logins,
+    database: Database,
+    api: API
+) {
 
     val page = Categories.fromString(path)
 
@@ -23,7 +33,12 @@ fun Settings(modifier: Modifier = Modifier, navController: NavHostController, pa
         return
     }
 
-    page.Page(modifier)
+    page.Page(
+        modifier = modifier,
+        logins = logins,
+        database = database,
+        api = api
+    )
 }
 
 @Composable

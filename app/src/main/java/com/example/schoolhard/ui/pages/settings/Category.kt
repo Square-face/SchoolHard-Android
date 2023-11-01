@@ -1,14 +1,20 @@
 package com.example.schoolhard.ui.pages.settings
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.schoolhard.API.API
+import com.example.schoolhard.data.Logins
+import com.example.schoolhard.database.Database
 import com.example.schoolhard.ui.pages.settings.categories.Account
 import com.example.schoolhard.ui.pages.settings.categories.Cache
 import com.example.schoolhard.ui.pages.settings.categories.Notifications
@@ -21,12 +27,20 @@ interface Category {
     fun CategoryButton(update: (Category) -> Unit)
 
     @Composable
-    fun RawPage(modifier: Modifier, reset: () -> Unit, update: (Category) -> Unit)
+    fun RawPage(modifier: Modifier, logins: Logins, database: Database, api: API)
 
     @Composable
-    fun Page(modifier: Modifier = Modifier, reset: () -> Unit = {}, update: (Category) -> Unit = {}) {
-        Column(modifier = modifier) {
-            RawPage(modifier=Modifier, reset = reset, update = update)
+    fun Page(modifier: Modifier = Modifier, logins: Logins, database: Database, api: API) {
+        Box(
+            modifier = modifier
+                .padding(start=25.dp, top = 20.dp, end=25.dp, bottom=0.dp)
+        ) {
+            RawPage(
+                modifier=Modifier,
+                logins = logins,
+                database = database,
+                api = api
+            )
         }
     }
 
