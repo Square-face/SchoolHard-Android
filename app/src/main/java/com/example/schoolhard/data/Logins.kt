@@ -59,7 +59,6 @@ class Login(val uuid: String, private val username: String, val appKey: String, 
  * A helper class for managing persistent storage on the device
  *
  * @param store SharedPreference store to use when saving login info
- * @property logins All currently stored logins
  * @property login The currently active login
  * */
 class Logins(private val store: SharedPreferences) {
@@ -146,6 +145,38 @@ class Logins(private val store: SharedPreferences) {
         val loginString = getString(uuid) ?: throw LoginExceptions.LoginNotFound(uuid)
 
         return Login.fromJSON(loginString)
+    }
+
+
+
+
+
+    /**
+     * Remove the current login from persistent storage
+     *
+     * @throws LoginExceptions.LoginNotFound If no login exists
+     * */
+    fun logout() {
+        val uuid = getActiveUUID() ?: throw LoginExceptions.LoginNotFound("No login exists")
+
+        remove(uuid)
+        store.edit().remove("index").commit()
+    }
+
+
+
+
+
+    /**
+     * Remove a specific login from persistent storage
+     *
+     * @param uuid The uuid of the login to remove
+     * */
+    private fun remove(uuid: String) {
+        val uuids = getUUIDs().toMutableSet()
+        uuids.remove(uuid)
+        storeSet("uuids", uuids)
+        store.edit().remove(uuid).commit()
     }
 
 

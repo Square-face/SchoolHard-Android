@@ -26,7 +26,7 @@ class Account: Category {
         ) {
             //UserInput.Toggle(state = true, title = "Auto Login", description = "Automatically login when the app starts") {}
             UserInput.Button(title = "Logout", description = "Logout of the current session") {
-
+                logins.logout()
             }
         }
     }
