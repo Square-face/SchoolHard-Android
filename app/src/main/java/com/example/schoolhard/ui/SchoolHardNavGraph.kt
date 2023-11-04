@@ -24,18 +24,24 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.schoolhard.API.API
 import com.example.schoolhard.R
+import com.example.schoolhard.data.Logins
 import com.example.schoolhard.database.Database
-import com.example.schoolhard.ui.schema.SchemaRoute
+import com.example.schoolhard.ui.home.Home
+import com.example.schoolhard.ui.pages.settings.Settings
+import com.example.schoolhard.ui.pages.schema.SchemaRoute
 
 @Composable
 fun SchoolHardNavGraph(
     api: API,
     database: Database,
+    logins: Logins,
     modifier: Modifier = Modifier,
     navController: NavHostController = rememberNavController(),
     openDrawer: () -> Unit = {},
@@ -57,27 +63,64 @@ fun SchoolHardNavGraph(
                 .scale(1.5F)
                 .padding(15.dp, 10.dp, 0.dp, 10.dp))
             Spacer(modifier = Modifier.width(30.dp))
-            Text(
-                text = stringResource(id = R.string.app_name),
-                style = TextStyle(
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight(600),
-                    color = Color(0xFFFFFFFF),
+            navController.currentDestination?.let { navDestination ->
+                Text(
+                    text = navDestination.route!!.replaceFirstChar { it.uppercase() },
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight(600),
+                        color = Color(0xFFFFFFFF),
+                    )
                 )
-            )
+            } ?:run {
+                Text(
+                    text = stringResource(id = R.string.app_name),
+                    style = TextStyle(
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight(600),
+                        color = Color(0xFFFFFFFF),
+                    )
+                )
+            }
         }
         NavHost(
             navController = navController,
             startDestination = startDestination,
             modifier = modifier
         ) {
-            composable(
-                route = SchoolHardDestinations.HOME_ROUTE,
-            ) {
-                Text(modifier = Modifier.padding(30.dp), text="PENIS")
+            composable(route = SchoolHardDestinations.HOME_ROUTE,) {
+                Home(api = api, database = database)
             }
-            composable(SchoolHardDestinations.SCHEMA_ROUTE) {
+
+            composable(SchoolHardDestinations.SCHEDULE_ROUTE) {
                 SchemaRoute(api = api, database = database)
+            }
+
+            composable(SchoolHardDestinations.SETTINGS_ROUTE) {
+                Settings(
+                    navController = navController,
+                    path = null,
+                    logins = logins,
+                    database = database,
+                    api = api,
+                )
+            }
+
+            val pageArg = navArgument("page") {
+                type = NavType.StringType
+            }
+
+            composable(
+                SchoolHardDestinations.SETTINGS_ROUTE+"/{page}",
+                listOf(pageArg)
+            ) { backStackEntry ->
+                Settings(
+                    navController = navController,
+                    path = backStackEntry.arguments?.getString("page"),
+                    logins = logins,
+                    database = database,
+                    api = api,
+                )
             }
         }
     }

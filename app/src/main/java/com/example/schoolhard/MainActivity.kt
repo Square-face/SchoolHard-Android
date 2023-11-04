@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
 
                 val database = Database(this, null)
 
-                SchoolHardApp(widthSizeClass, api, database)
+                SchoolHardApp(widthSizeClass, api, database, logins)
             }
         }
     }

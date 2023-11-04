@@ -3,11 +3,14 @@ package com.example.schoolhard.ui
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,31 +31,49 @@ import com.example.schoolhard.R
 @Composable
 fun AppDrawer(
     currentRoute: String,
-    navigateToHome: () -> Unit,
     navigateToToday: () -> Unit,
+    navigateToSchedule: () -> Unit,
+    navigateToSettings: () -> Unit,
     closeDrawer: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    ModalDrawerSheet(modifier.background(MaterialTheme.colorScheme.secondaryContainer)) {
+    ModalDrawerSheet(
+        modifier
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .fillMaxHeight()
+    ) {
         Row {
             SchoolHardLogo(
                 modifier = Modifier.padding(horizontal = 28.dp, vertical = 24.dp)
             )
         }
+
         NavigationDrawerItem(
             label = { Text(stringResource(id = R.string.home_title)) },
             icon = { Icon(Icons.Filled.Home, null) },
             selected = currentRoute == SchoolHardDestinations.HOME_ROUTE,
-            onClick = { navigateToHome(); closeDrawer() },
-            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-        )
-        NavigationDrawerItem(
-            label = { Text(stringResource(id = R.string.schema_title)) },
-            icon = { Icon(Icons.Filled.Info, null) },
-            selected = currentRoute == SchoolHardDestinations.SCHEMA_ROUTE,
             onClick = { navigateToToday(); closeDrawer() },
             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
         )
+
+        NavigationDrawerItem(
+            label = { Text(stringResource(id = R.string.schema_title)) },
+            icon = { Icon(Icons.Filled.DateRange, null) },
+            selected = currentRoute == SchoolHardDestinations.SCHEDULE_ROUTE,
+            onClick = { navigateToSchedule(); closeDrawer() },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        NavigationDrawerItem(
+            label = { Text("Settings") },
+            icon = { Icon(Icons.Filled.Settings, null) },
+            selected = currentRoute == SchoolHardDestinations.SETTINGS_ROUTE,
+            onClick = { navigateToSettings(); closeDrawer() },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+        Spacer(modifier = Modifier.height(15.dp))
     }
 }
 

@@ -1,4 +1,4 @@
-package com.example.schoolhard.ui.schema
+package com.example.schoolhard.ui.pages.schema
 
 import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
@@ -22,7 +22,7 @@ fun Schema(modifier: Modifier = Modifier, lessons: List<Lesson>) {
             .fillMaxSize()
     ) {
         items(lessons) {
-            LessonView(lesson = it).Medium()
+            LessonView(lesson = it).Large()
         }
     }
 }

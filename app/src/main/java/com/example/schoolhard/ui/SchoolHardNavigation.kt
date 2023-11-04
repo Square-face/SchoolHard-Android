@@ -8,7 +8,8 @@ import androidx.navigation.NavHostController
  */
 object SchoolHardDestinations {
     const val HOME_ROUTE = "home"
-    const val SCHEMA_ROUTE = "today"
+    const val SCHEDULE_ROUTE = "schedule"
+    const val SETTINGS_ROUTE = "settings"
 }
 
 /**
@@ -23,15 +24,28 @@ class SchoolHardNavigationActions(navController: NavHostController) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }
+
             // Avoid multiple copies of the same destination when
             // reselecting the same item
             launchSingleTop = true
+
             // Restore state when reselecting a previously selected item
             restoreState = true
         }
     }
-    val navigateToToday: () -> Unit = {
-        navController.navigate(SchoolHardDestinations.SCHEMA_ROUTE) {
+
+    val navigateToSchedule: () -> Unit = {
+        navController.navigate(SchoolHardDestinations.SCHEDULE_ROUTE) {
+            popUpTo(navController.graph.findStartDestination().id) {
+                saveState = true
+            }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
+    val navigateToSettings: () -> Unit = {
+        navController.navigate(SchoolHardDestinations.SETTINGS_ROUTE) {
             popUpTo(navController.graph.findStartDestination().id) {
                 saveState = true
             }

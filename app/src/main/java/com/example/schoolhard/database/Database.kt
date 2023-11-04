@@ -13,22 +13,22 @@ import com.example.schoolhard.API.Subject
 import com.example.schoolhard.API.Occasion
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.Exception
 
 private val timeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
 private val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu/MM/dd")
-private val dateTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss")
+private val _dateTimeFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("uuuu/MM/dd HH:mm:ss")
 
 private val OLD_TABLES = listOf("schema")
 
 class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
     SQLiteOpenHelper(context, "schema", factory, 23) {
 
-    private val utils = Utils()
+    private val utils = Utils(this)
 
     /**
      * Creating all database tables
@@ -187,13 +187,149 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
 
         // parse results
         while (!cursor.isAfterLast) {
-            lessons.add(utils.parseLesson(this, cursor, occasions, subjects))
+            lessons.add(utils.parseLesson(cursor, occasions, subjects))
 
             cursor.moveToNext()
         }
         cursor.close()
 
         return lessons
+    }
+
+
+
+    /**
+     * Get parts of the schedule based on a filter using dates
+     *
+     * @param after The requested start date
+     * @param before The requested end date
+     *
+     * @return A filtered schedule
+     * */
+    fun getSchedule(after: LocalDateTime?=null, before: LocalDateTime?=null): List<Lesson> {
+        Log.d("Database - getSchedule", "Getting schedule with query (after: $after, before: $before)")
+        val db = this.readableDatabase
+
+        val query = Utils.Query.lessonQuery(after, before)
+
+        // execute sql query
+        val cursor = db.rawQuery(query.query + " ORDER BY ${Schema.Lesson.Columns.date} ASC, ${Schema.Lesson.Columns.startTime} ASC", query.args)
+        Log.v("Database - getSchedule", "query returned with ${cursor.count} rows")
+
+        // cache
+        val subjects = mutableListOf<Subject>()
+        val occasions = mutableListOf<Occasion>()
+        val lessons = mutableListOf<Lesson>()
+
+        cursor.moveToFirst()
+
+        // parse results
+        while (!cursor.isAfterLast) {
+            lessons.add(utils.parseLesson(cursor, occasions, subjects))
+
+            cursor.moveToNext()
+        }
+        cursor.close()
+
+        return lessons
+    }
+
+
+
+
+
+    /**
+     * Get parts of the schedule based on a filter using dates from lesson isntances
+     *
+     * @param after The requested start date
+     * @param before The requested end date
+     *
+     * @return A filtered schedule
+     * */
+    fun getSchedule(after: Lesson?=null, before: Lesson?=null): List<Lesson> {
+        return getSchedule(after?.endTime, before?.startTime)
+    }
+
+
+
+
+
+    /**
+     * Get the previous lesson or null.
+     *
+     * @return The previous lesson or null if no lesson is found
+     * */
+    fun previousLesson(): Lesson? {
+        val db = this.readableDatabase
+
+        // make and execute request
+        val query = Utils.Query.lessonQuery(before = LocalDateTime.now())
+        val cursor = db.rawQuery(query.query + " ORDER BY ${Schema.Lesson.Columns.date} DESC, ${Schema.Lesson.Columns.endTime} DESC", query.args)
+
+        // null check
+        if (cursor.count == 0) { return null }
+
+        // parse
+        cursor.moveToFirst()
+        val lesson = utils.parseLesson(cursor, mutableListOf(), mutableListOf())
+        cursor.close()
+
+        return lesson
+    }
+
+
+
+
+
+    /**
+     * Get the lesson that is currently ongoing or null.
+     *
+     * @return The current lesson or null if no lesson is currently ongoing
+     * */
+    fun currentLesson(): Lesson? {
+        val db = this.readableDatabase
+
+        // make and execute request
+        val query = Utils.Query.lessonQuery(at = LocalDateTime.now())
+        val cursor = db.rawQuery(query.query, query.args)
+
+
+        // null check
+        if (cursor.count == 0) { return null }
+
+        // parse
+        cursor.moveToFirst()
+        val lesson = utils.parseLesson(cursor, mutableListOf(), mutableListOf())
+        cursor.close()
+
+        return lesson
+    }
+
+
+
+
+
+    /**
+     * Get the first lesson with a start time after now.
+     *
+     * @return Next lesson or null if no lesson is found
+     * */
+    fun nextLesson(): Lesson? {
+        val db = this.readableDatabase
+
+        // make and execute request
+        val query = Utils.Query.lessonQuery(after = LocalDateTime.now())
+        val cursor = db.rawQuery(query.query + " ORDER BY ${Schema.Lesson.Columns.date} ASC, ${Schema.Lesson.Columns.startTime} ASC", query.args)
+
+        // null check
+        if (cursor.count == 0) { return null }
+
+        // parse
+        cursor.moveToFirst()
+        val lesson = utils.parseLesson(cursor, mutableListOf(), mutableListOf())
+        cursor.close()
+
+        return lesson
     }
 
 
@@ -415,7 +551,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
      *
      * @return parsed lesson object or null if no lesson is found
      * */
-    fun getLesson(uuid: String, parent: Occasion): Lesson? {
+    fun getLesson(_uuid: String, _parent: Occasion): Lesson? {
         TODO("Not Implemented")
     }
 
@@ -444,7 +580,7 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
 
         // parse
         cursor.moveToFirst()
-        val occasion = utils.parseOccasion(this, cursor, mutableListOf(parent))
+        val occasion = utils.parseOccasion(cursor, mutableListOf(parent))
         cursor.close()
 
         return occasion
@@ -513,13 +649,16 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
     fun storeOccasion(db: SQLiteDatabase, occasion: Occasion) {
         val values = ContentValues()
 
+        // uuid's
         values.put("uuid", occasion.id.toString())
         values.put("occasionId", occasion.occasionId)
         values.put("subjectUUID", occasion.subject.id.toString())
+
         values.put("location", occasion.location.name)
+
         values.put("dayOfWeek", occasion.dayOfWeek.value)
-        values.put("startTime", ChronoUnit.MINUTES.between(LocalTime.MIN, occasion.startTime))
-        values.put("endTime", ChronoUnit.MINUTES.between(LocalTime.MIN, occasion.endTime))
+        values.put("startTime", occasion.startTime.toSecondOfDay())
+        values.put("endTime", occasion.endTime.toSecondOfDay())
 
         db.insert(Schema.Occasion.table, null, values)
     }
@@ -543,16 +682,15 @@ class Database(context: Context, factory: SQLiteDatabase.CursorFactory?):
         values.put("dayofweek", lesson.dayOfWeek.value)
         values.put("week", lesson.week)
 
-        // days from [LocalDate.MIN] witch is always the same
-        values.put("date", ChronoUnit.DAYS.between(LocalDate.ofYearDay(2000, 1), lesson.date))
+        // represent date as days since 1970-01-01
+        values.put("date", lesson.date.toEpochDay())
 
-        // represent time as minutes from start of day
-        values.put("startTime", ChronoUnit.MINUTES.between(LocalTime.MIN, lesson.startTime.toLocalTime()))
-        values.put("endTime", ChronoUnit.MINUTES.between(LocalTime.MIN, lesson.endTime.toLocalTime()))
+        // represent time as seconds from start of day
+        values.put("startTime", lesson.occasion.startTime.toSecondOfDay())
+        values.put("endTime", lesson.occasion.endTime.toSecondOfDay())
 
         db.insert(Schema.Lesson.table, null, values)
     }
-
 
 
     /**

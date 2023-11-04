@@ -1,4 +1,4 @@
-package com.example.schoolhard.ui.schema
+package com.example.schoolhard.ui.pages.schema
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Arrangement

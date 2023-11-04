@@ -2,6 +2,7 @@ package com.example.schoolhard.ui.components.lesson
 
 import androidx.annotation.IntRange
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -14,8 +15,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -25,6 +32,8 @@ import androidx.compose.ui.unit.sp
 import com.example.schoolhard.API.Lesson
 import com.example.schoolhard.utils.getDelta
 import com.example.schoolhard.utils.getDeltaString
+import kotlinx.coroutines.delay
+import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.roundToInt
@@ -67,14 +76,22 @@ class Progress(private val progress: Float) {
      * A thinner lesson view that only shows name and a string representation on the status.
      * */
     @Composable
-    fun Thin(modifier: Modifier = Modifier) {
-        val radius = calculateRadius(4)
+    fun Thin(
+        modifier: Modifier = Modifier,
+        height: Int = 8,
+        background: Color = Color(0xFF707070),
+        fullyRounded: Boolean = false
+    ) {
+
+        val radius = if (fullyRounded) height/2 else calculateRadius(height/2)
+        val rounding = if (fullyRounded) RoundedCornerShape(radius.dp) else RoundedCornerShape(0.dp)
 
         Box(
             modifier = modifier
                 .fillMaxWidth()
-                .height(8.dp)
-                .background(Color(0xFF707070))
+                .height(height.dp)
+                .background(background, rounding)
+                .clip(rounding)
         ){
             Box(
                 modifier = modifier
@@ -202,12 +219,12 @@ class Time(val lesson: Lesson) {
      * Display lesson duration
      * */
     @Composable
-    fun Duration(modifier: Modifier = Modifier){
+    fun Duration(modifier: Modifier = Modifier, weight: Int = 500){
         RawDelta(
             modifier = modifier,
             delta = lesson.duration,
             fontSize = 17.sp,
-            fontWeight = 500,
+            fontWeight = weight,
         )
     }
 
@@ -460,6 +477,66 @@ class Time(val lesson: Lesson) {
         return false
     }
 
+
+}
+
+
+
+class Recess(private val start: LocalDateTime, end: LocalDateTime) {
+
+    private val duration = Duration.between(start, end)
+
+    // gray
+    private val color = Color(0xFF707070)
+
+    /**
+     * Display recess duration as a thin line with a string representation of the duration
+     * */
+    @Composable
+    fun Line(modifier: Modifier = Modifier) {
+
+        // don't show if duration is 0
+        if (duration.isZero) { return }
+
+
+        // progress bars
+        var progress by remember { mutableStateOf(getDelta(start, LocalDateTime.now()).toFloat() / duration.toMillis()) }
+        val progress1 = Progress((progress*2).coerceIn(0f, 1f))
+        val progress2 = Progress(((progress*2)-1f).coerceIn(0f, 1f))
+
+        LaunchedEffect(key1 = true) {
+            while (true) {
+                progress = getDelta(start, LocalDateTime.now()).toFloat() / duration.toMillis()
+                delay(1000)
+            }
+        }
+
+        Row(
+            modifier = modifier,
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+
+            // progress bar representing half the recess
+            progress1.Thin(modifier = Modifier.weight(1f), height = 2, background = color, fullyRounded = true)
+
+            Text(
+                text = getDeltaString(duration.toMillis()),
+                color = color
+            )
+
+            // progress bar representing half the recess
+            progress2.Thin(modifier = Modifier.weight(1f), height = 2, background = color, fullyRounded = true)
+        }
+
+    }
+
+
+    companion object {
+        fun from(before: Lesson, after: Lesson): Recess {
+            return Recess(before.endTime, after.startTime)
+        }
+    }
 
 }
 
