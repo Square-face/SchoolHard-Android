@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.schoolhard.API.API
-import com.example.schoolhard.data.Logins
+import com.example.schoolhard.stores.Logins
 import com.example.schoolhard.database.Database
 import com.example.schoolhard.ui.theme.SchoolHardTheme
 import kotlinx.coroutines.launch

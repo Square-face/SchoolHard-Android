@@ -56,10 +56,10 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.schoolhard.API.API
-import com.example.schoolhard.API.School
+import com.example.schoolhard.data.School
 import com.example.schoolhard.API.SchoolSoft.SchoolSoftAPI
-import com.example.schoolhard.API.UserType
-import com.example.schoolhard.data.Logins
+import com.example.schoolhard.data.UserType
+import com.example.schoolhard.stores.Logins
 import com.example.schoolhard.ui.theme.SchoolHardTheme
 
 

@@ -4,7 +4,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
-import com.example.schoolhard.API.Lesson
+import com.example.schoolhard.data.Lesson
 import com.example.schoolhard.R
 import com.example.schoolhard.utils.getDeltaString
 import java.time.Duration

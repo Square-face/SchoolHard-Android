@@ -29,7 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.schoolhard.API.Lesson
+import com.example.schoolhard.data.Lesson
 import com.example.schoolhard.utils.getDelta
 import com.example.schoolhard.utils.getDeltaString
 import kotlinx.coroutines.delay

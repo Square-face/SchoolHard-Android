@@ -31,7 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.schoolhard.API.API
 import com.example.schoolhard.R
-import com.example.schoolhard.data.Logins
+import com.example.schoolhard.stores.Logins
 import com.example.schoolhard.database.Database
 import com.example.schoolhard.ui.home.Home
 import com.example.schoolhard.ui.pages.settings.Settings

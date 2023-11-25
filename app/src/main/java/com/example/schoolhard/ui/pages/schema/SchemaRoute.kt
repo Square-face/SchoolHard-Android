@@ -14,7 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.schoolhard.API.API
-import com.example.schoolhard.API.Lesson
+import com.example.schoolhard.data.Lesson
 import com.example.schoolhard.database.Database
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -27,7 +27,7 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import com.example.schoolhard.API.SchoolSoft.SchoolSoftAPI
-import com.example.schoolhard.data.Logins
+import com.example.schoolhard.stores.Logins
 
 class UpdateSchedule(context: Context, params: WorkerParameters) : Worker(context, params) {
     override fun doWork(): Result {

@@ -14,7 +14,7 @@ import androidx.core.view.WindowCompat
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.schoolhard.API.SchoolSoft.SchoolSoftAPI
-import com.example.schoolhard.data.Logins
+import com.example.schoolhard.stores.Logins
 import com.example.schoolhard.database.Database
 import com.example.schoolhard.notifications.PersistentWorker
 import com.example.schoolhard.notifications.NotificationsSchema

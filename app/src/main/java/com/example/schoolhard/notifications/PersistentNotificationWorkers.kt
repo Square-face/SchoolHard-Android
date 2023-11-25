@@ -4,9 +4,9 @@ import android.app.NotificationManager
 import android.content.Context
 import androidx.work.Worker
 import androidx.work.WorkerParameters
-import com.example.schoolhard.API.Lesson
+import com.example.schoolhard.data.Lesson
 import com.example.schoolhard.API.SchoolSoft.SchoolSoftAPI
-import com.example.schoolhard.data.Logins
+import com.example.schoolhard.stores.Logins
 import com.example.schoolhard.database.Database
 
 /**

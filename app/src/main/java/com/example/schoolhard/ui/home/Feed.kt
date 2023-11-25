@@ -9,8 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.schoolhard.API.Lesson
-import com.example.schoolhard.ui.components.lesson.LessonView
+import com.example.schoolhard.data.Lesson
 import com.example.schoolhard.ui.components.lesson.Recess
 import java.time.Duration
 import java.time.LocalDateTime
@@ -60,7 +59,7 @@ fun Feed(modifier: Modifier = Modifier, previous: Lesson?, current: Lesson?, nex
         // Set previous lesson to be the same size as next lesson if there is no current lesson
         previous?.let { item {
 
-            LessonView(lesson = it).apply {
+            it.apply {
                 when (current) {
 
                     null -> Medium(modifier = thiner)
@@ -76,11 +75,11 @@ fun Feed(modifier: Modifier = Modifier, previous: Lesson?, current: Lesson?, nex
         previous?.let { if (current == null && next != null) item { Recess.from(it, next).Line(modifier = thiner) } }
 
         // next and current
-        current?.let { item { LessonView(lesson = it).Large() } }
+        current?.let { item { it.Large() } }
 
         // Recess between current and next
         current?.let { if (next != null) item { Recess.from(it, next).Line(modifier = thiner) } }
 
-        next?.let { item { LessonView(lesson = it).Medium(modifier = thiner) } }
+        next?.let { item { it.Medium(modifier = thiner) } }
     }
 }

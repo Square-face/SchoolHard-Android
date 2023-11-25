@@ -1,10 +1,10 @@
 package com.example.schoolhard.database
 
 import android.database.Cursor
-import com.example.schoolhard.API.Lesson
-import com.example.schoolhard.API.Location
-import com.example.schoolhard.API.Occasion
-import com.example.schoolhard.API.Subject
+import com.example.schoolhard.data.Lesson
+import com.example.schoolhard.data.Location
+import com.example.schoolhard.data.Occasion
+import com.example.schoolhard.data.Subject
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime

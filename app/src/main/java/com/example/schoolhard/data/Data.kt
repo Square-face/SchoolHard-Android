@@ -1,5 +1,36 @@
-package com.example.schoolhard.API
+package com.example.schoolhard.data
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.schoolhard.ui.components.lesson.Meta
+import com.example.schoolhard.ui.components.lesson.Progress
+import com.example.schoolhard.ui.components.lesson.Time
 import java.lang.Exception
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -7,6 +38,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.util.UUID
 import com.example.schoolhard.utils.getProgress
+import kotlinx.coroutines.delay
 import java.time.Duration
 
 /*=== USER ===*/
@@ -50,7 +82,7 @@ enum class UserType{
          * @throws Exception Supplied ordinal was not one of the possible entries
          * @return enum entry
          * */
-        fun from(ordinal: Int): UserType{
+        fun from(ordinal: Int): UserType {
             when (ordinal) {
                 Parent.ordinal -> return Parent
                 Student.ordinal -> return Student
@@ -139,55 +171,6 @@ data class Occasion(
     val endTime: LocalTime,
     val dayOfWeek: DayOfWeek,
 )
-
-
-
-/**
- * Lesson representation
- *
- * Stores information about a specific occurrence of a subject. Unlike [Occasion] witch
- * represents when in a week a lesson might be scheduled for. This class represents exactly one
- * schedule item.
- *
- * @param occasion Parent occasion
- * @param week Week this lesson is scheduled for
- * @param date Date this lesson is scheduled for
- * @param uuid UUID to use, if null a new uuid will be generated
- *
- * @property id Unique identifier, if [uuid] is not null it will be used, otherwise a new is generated
- * @property subject Parent subject
- * @property name subject name
- * @property location Where the lesson is going to be taking place
- * @property dayOfWeek What day of the week the lesson happens on
- * @property startTime [LocalDateTime] object representing when the lesson starts
- * @property endTime [LocalDateTime] object representing when the lesson ends
- *
- * @property progress Current progress as a float between 0 and 1. Regenerated every time requested
- * */
-data class Lesson (
-    val occasion: Occasion,
-    val week: Int,
-    val date: LocalDate,
-    val uuid: UUID? = null,
-) {
-
-
-
-    // generate a new uuid if [uuid] is null
-    val id: UUID = uuid.also { uuid }?: run { UUID.randomUUID() }
-
-    val subject = occasion.subject
-    val name = subject.name
-    val location = occasion.location
-
-    val dayOfWeek = occasion.dayOfWeek
-    val startTime = occasion.startTime.atDate(date)
-    val endTime = occasion.endTime.atDate(date)
-    val duration = Duration.between(startTime, endTime).toMillis()
-
-    // generated on request
-    val progress: Float get() { return getProgress(startTime, LocalDateTime.now(), endTime) }
-}
 
 
 

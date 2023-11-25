@@ -1,4 +1,4 @@
-package com.example.schoolhard.ui.components.lesson
+package com.example.schoolhard.data
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -28,15 +28,61 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.schoolhard.API.Lesson
+import com.example.schoolhard.ui.components.lesson.Meta
+import com.example.schoolhard.ui.components.lesson.Progress
+import com.example.schoolhard.ui.components.lesson.Time
+import com.example.schoolhard.utils.getProgress
 import kotlinx.coroutines.delay
+import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.util.UUID
 
 /**
- * Holding class for all lesson view models
+ * Lesson representation
  *
- * @param lesson Lesson to create view for
+ * Stores information about a specific occurrence of a subject. Unlike [Occasion] witch
+ * represents when in a week a lesson might be scheduled for. This class represents exactly one
+ * schedule item.
+ *
+ * @param occasion Parent occasion
+ * @param week Week this lesson is scheduled for
+ * @param date Date this lesson is scheduled for
+ * @param uuid UUID to use, if null a new uuid will be generated
+ *
+ * @property id Unique identifier, if [uuid] is not null it will be used, otherwise a new is generated
+ * @property subject Parent subject
+ * @property name subject name
+ * @property location Where the lesson is going to be taking place
+ * @property dayOfWeek What day of the week the lesson happens on
+ * @property startTime [LocalDateTime] object representing when the lesson starts
+ * @property endTime [LocalDateTime] object representing when the lesson ends
+ *
+ * @property progress Current progress as a float between 0 and 1. Regenerated every time requested
  * */
-class LessonView(val lesson: Lesson) {
+data class Lesson (
+    val occasion: Occasion,
+    val week: Int,
+    val date: LocalDate,
+    val uuid: UUID? = null,
+) {
+
+
+
+    // generate a new uuid if [uuid] is null
+    val id: UUID = uuid.also { uuid }?: run { UUID.randomUUID() }
+
+    val subject = occasion.subject
+    val name = subject.name
+    val location = occasion.location
+
+    val dayOfWeek = occasion.dayOfWeek
+    val startTime = occasion.startTime.atDate(date)
+    val endTime = occasion.endTime.atDate(date)
+    val duration = Duration.between(startTime, endTime).toMillis()
+
+    // generated on request
+    val progress: Float get() { return getProgress(startTime, LocalDateTime.now(), endTime) }
 
 
     /**
@@ -45,12 +91,13 @@ class LessonView(val lesson: Lesson) {
     @Composable
     fun Large(modifier: Modifier = Modifier) {
 
-        var progress by remember { mutableStateOf(Progress(lesson.progress)) }
-        var time by remember { mutableStateOf(Time(lesson)) }
-        val meta = Meta(lesson)
+        var progress by remember { mutableStateOf(Progress(progress)) }
+        var time by remember { mutableStateOf(Time(this)) }
+        val meta = Meta(this)
+        val lesson = this
 
         // Update progress and time every second
-        LaunchedEffect(lesson) {
+        LaunchedEffect(this) {
             while(true) {
                 progress = Progress(lesson.progress)
                 time = Time(lesson)
@@ -109,9 +156,10 @@ class LessonView(val lesson: Lesson) {
     @Composable
     fun Medium(modifier: Modifier = Modifier) {
 
-        var progress by remember { mutableStateOf(Progress(lesson.progress)) }
-        var time by remember { mutableStateOf(Time(lesson)) }
-        val meta = Meta(lesson)
+        var progress by remember { mutableStateOf(Progress(progress)) }
+        var time by remember { mutableStateOf(Time(this)) }
+        val meta = Meta(this)
+        val lesson = this
 
         // Update progress and time every second
         LaunchedEffect(lesson) {
@@ -170,10 +218,11 @@ class LessonView(val lesson: Lesson) {
     @Composable
     fun Thin(modifier: Modifier = Modifier) {
 
-        var time by remember { mutableStateOf(Time(lesson)) }
+        var time by remember { mutableStateOf(Time(this)) }
+        val lesson = this
 
         // Update progress and time every second
-        LaunchedEffect(lesson) {
+        LaunchedEffect(this) {
             while(true) {
                 time = Time(lesson)
                 delay(1000)

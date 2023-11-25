@@ -10,7 +10,11 @@ package com.example.schoolhard.API
  * */
 
 import android.util.Log
-import com.example.schoolhard.data.Logins
+import com.example.schoolhard.data.Lesson
+import com.example.schoolhard.data.School
+import com.example.schoolhard.data.User
+import com.example.schoolhard.data.UserType
+import com.example.schoolhard.stores.Logins
 
 
 /**

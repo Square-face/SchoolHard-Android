@@ -1,9 +1,9 @@
-package com.example.schoolhard.data
+package com.example.schoolhard.stores
 
 import android.content.SharedPreferences
 import android.util.Log
-import com.example.schoolhard.API.User
-import com.example.schoolhard.API.UserType
+import com.example.schoolhard.data.User
+import com.example.schoolhard.data.UserType
 import org.json.JSONObject
 import java.lang.Exception
 

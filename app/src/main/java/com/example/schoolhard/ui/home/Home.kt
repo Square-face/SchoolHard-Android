@@ -8,7 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.example.schoolhard.API.API
-import com.example.schoolhard.API.Lesson
+import com.example.schoolhard.data.Lesson
 import com.example.schoolhard.database.Database
 
 /**

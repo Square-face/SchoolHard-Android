@@ -9,8 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.example.schoolhard.API.Lesson
-import com.example.schoolhard.ui.components.lesson.LessonView
+import com.example.schoolhard.data.Lesson
 
 @Composable
 fun Schema(modifier: Modifier = Modifier, lessons: List<Lesson>) {
@@ -22,7 +21,7 @@ fun Schema(modifier: Modifier = Modifier, lessons: List<Lesson>) {
             .fillMaxSize()
     ) {
         items(lessons) {
-            LessonView(lesson = it).Large()
+            it.Large()
         }
     }
 }

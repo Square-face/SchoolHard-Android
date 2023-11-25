@@ -7,10 +7,10 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.util.Log
 import com.example.schoolhard.API.API
-import com.example.schoolhard.API.Lesson
-import com.example.schoolhard.API.Location
-import com.example.schoolhard.API.Subject
-import com.example.schoolhard.API.Occasion
+import com.example.schoolhard.data.Lesson
+import com.example.schoolhard.data.Location
+import com.example.schoolhard.data.Subject
+import com.example.schoolhard.data.Occasion
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
