@@ -34,6 +34,12 @@ fun Feed(modifier: Modifier = Modifier, previous: Lesson?, current: Lesson?, nex
     val triggerDate = current?.endTime ?: next?.startTime ?: return
     val triggerDelay = Duration.between(LocalDateTime.now(), triggerDate).toMillis()
 
+    if (triggerDelay < 0) {
+        Log.w("Feed", "Trigger delay is negative, skipping update")
+        Log.d("Feed", "Trigger date: $triggerDate, current date: ${LocalDateTime.now()}")
+        return
+    }
+
     // Schedule update for when the current lesson ends
     Timer().schedule(object : TimerTask() {
         override fun run() {
