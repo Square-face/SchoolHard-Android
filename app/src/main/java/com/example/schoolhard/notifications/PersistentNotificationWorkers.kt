@@ -37,7 +37,8 @@ class PersistentWorker(context: Context, params: WorkerParameters): Worker(conte
             NotificationsSchema.PersistentNotification().createRecessNotification(
                 applicationContext,
                 next
-            ).build()
+            )
+                .build()
         )
     }
 
@@ -54,10 +55,9 @@ class PersistentWorker(context: Context, params: WorkerParameters): Worker(conte
         val database = Database(applicationContext, null)
 
         database.currentLesson()?.let {
-            Log.v("PersistentWorker", "lesson is ${it.name}")
             updateLessonNotification(notificationManager, it)
             val duration = DeltaFormatter.nextChange(it.endTime)
-            Log.v("PersistentWorker", "next change is in ${duration.seconds}s")
+            Log.v("PersistentWorker", "active lesson, next change is in ${duration.seconds}s")
 
             val notificationWorker = OneTimeWorkRequestBuilder<PersistentWorker>()
                 .setInitialDelay(duration)
@@ -65,7 +65,7 @@ class PersistentWorker(context: Context, params: WorkerParameters): Worker(conte
 
             WorkManager.getInstance(applicationContext).enqueueUniqueWork(
                 "persistent", // Make sure there is only one notification worker running
-                ExistingWorkPolicy.APPEND, // Keep the old worker if there is one
+                ExistingWorkPolicy.REPLACE, // Keep the old worker if there is one
                 notificationWorker
             )
 
@@ -73,10 +73,9 @@ class PersistentWorker(context: Context, params: WorkerParameters): Worker(conte
         }
 
         database.nextLesson()?.let {
-            Log.v("PersistentWorker", "currently in recess")
             updateRecessNotification(notificationManager, it)
             val duration = DeltaFormatter.nextChange(it.startTime)
-            Log.v("PersistentWorker", "next change is in ${duration.seconds}s")
+            Log.v("PersistentWorker", "In recess, next change is in ${duration.seconds}s")
 
             val notificationWorker = OneTimeWorkRequestBuilder<PersistentWorker>()
                 .setInitialDelay(duration)
@@ -84,7 +83,7 @@ class PersistentWorker(context: Context, params: WorkerParameters): Worker(conte
 
             WorkManager.getInstance(applicationContext).enqueueUniqueWork(
                 "persistent", // Make sure there is only one notification worker running
-                ExistingWorkPolicy.APPEND, // Keep the old worker if there is one
+                ExistingWorkPolicy.REPLACE, // Keep the old worker if there is one
                 notificationWorker
             )
 
