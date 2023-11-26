@@ -4,11 +4,9 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
 import androidx.core.app.NotificationCompat
-import com.example.schoolhard.data.Lesson
 import com.example.schoolhard.R
-import com.example.schoolhard.utils.getDeltaString
-import java.time.Duration
-import java.time.LocalDateTime
+import com.example.schoolhard.data.Lesson
+import com.example.schoolhard.utils.DeltaFormatter
 import java.time.format.DateTimeFormatter
 
 class NotificationsSchema {
@@ -27,12 +25,9 @@ class NotificationsSchema {
         fun createRecessNotification(context: Context, next: Lesson): NotificationCompat.Builder {
             val format = DateTimeFormatter.ofPattern("HH:mm")
 
-            val delta = Duration.between(LocalDateTime.now(), next.startTime)
-            val deltaString = getDeltaString(delta.toMillis())
-
             return NotificationCompat.Builder(context, channel.channelId)
                 .setChannelId(channel.channelId)
-                .setContentTitle(deltaString)
+                .setContentTitle(DeltaFormatter.getDurationString(next.startTime, expanded = true))
                 .setContentText(next.name)
                 .setSubText("${next.location.name} ${next.startTime.format(format)} - ${next.endTime.format(format)}")
                 .setShowWhen(false)

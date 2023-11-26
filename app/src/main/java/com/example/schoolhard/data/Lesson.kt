@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.example.schoolhard.ui.components.lesson.Meta
 import com.example.schoolhard.ui.components.lesson.Progress
 import com.example.schoolhard.ui.components.lesson.Time
+import com.example.schoolhard.utils.DeltaFormatter
 import com.example.schoolhard.utils.getProgress
 import kotlinx.coroutines.delay
 import java.time.Duration
@@ -59,6 +60,12 @@ import java.util.UUID
  * @property endTime [LocalDateTime] object representing when the lesson ends
  *
  * @property progress Current progress as a float between 0 and 1. Regenerated every time requested
+ *
+ * @property StartTimeString [startTime] as a string
+ * @property EndTimeString [endTime] as a string
+ *
+ * @property StartTimeChangeDuration Time until [startTime] changes
+ * @property EndTimeChangeDuration Time until [endTime] changes
  * */
 data class Lesson (
     val occasion: Occasion,
@@ -83,6 +90,22 @@ data class Lesson (
 
     // generated on request
     val progress: Float get() { return getProgress(startTime, LocalDateTime.now(), endTime) }
+
+    val StartTimeString: String get() {
+        return DeltaFormatter.getDurationString(startTime)
+    }
+
+    val EndTimeString: String get() {
+        return DeltaFormatter.getDurationString(endTime)
+    }
+
+    val StartTimeChangeDuration: Duration get() {
+        return DeltaFormatter.nextChange(startTime)
+    }
+
+    val EndTimeChangeDuration: Duration get() {
+        return DeltaFormatter.nextChange(endTime)
+    }
 
 
     /**

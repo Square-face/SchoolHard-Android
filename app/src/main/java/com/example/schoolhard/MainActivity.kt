@@ -11,19 +11,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.core.view.WindowCompat
-import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.ExistingWorkPolicy
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import com.example.schoolhard.API.SchoolSoft.SchoolSoftAPI
-import com.example.schoolhard.stores.Logins
 import com.example.schoolhard.database.Database
-import com.example.schoolhard.notifications.PersistentWorker
 import com.example.schoolhard.notifications.NotificationsSchema
+import com.example.schoolhard.notifications.PersistentWorker
+import com.example.schoolhard.stores.Logins
 import com.example.schoolhard.ui.SchoolHardApp
 import com.microsoft.appcenter.AppCenter
 import com.microsoft.appcenter.analytics.Analytics
 import com.microsoft.appcenter.crashes.Crashes
 import com.microsoft.appcenter.distribute.Distribute
-import java.time.Duration
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -36,8 +36,12 @@ class MainActivity : ComponentActivity() {
 
         NotificationsSchema.Channel.createAll(this.getSystemService(NotificationManager::class.java)!!)
 
-        val persistantWorker = PeriodicWorkRequestBuilder<PersistentWorker>(Duration.ofSeconds(10)).build()
-        WorkManager.getInstance(this).enqueue(persistantWorker)
+        val notificationWorker = OneTimeWorkRequestBuilder<PersistentWorker>().build()
+        WorkManager.getInstance(this).enqueueUniqueWork(
+            "persistent", // Make sure there is only one notification worker running
+            ExistingWorkPolicy.REPLACE, // Keep the old worker if there is one
+            notificationWorker
+        )
 
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
