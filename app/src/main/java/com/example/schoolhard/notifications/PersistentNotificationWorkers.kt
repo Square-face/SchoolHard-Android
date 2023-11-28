@@ -57,10 +57,11 @@ class PersistentWorker(context: Context, params: WorkerParameters): Worker(conte
         database.currentLesson()?.let {
             updateLessonNotification(notificationManager, it)
             val duration = DeltaFormatter.nextChange(it.endTime)
+            val fixedDuration = (duration.isZero).let { if (it) duration.plusSeconds(1) else duration }
             Log.v("PersistentWorker", "active lesson, next change is in ${duration.seconds}s")
 
             val notificationWorker = OneTimeWorkRequestBuilder<PersistentWorker>()
-                .setInitialDelay(duration)
+                .setInitialDelay(fixedDuration)
                 .build()
 
             WorkManager.getInstance(applicationContext).enqueueUniqueWork(
@@ -75,10 +76,11 @@ class PersistentWorker(context: Context, params: WorkerParameters): Worker(conte
         database.nextLesson()?.let {
             updateRecessNotification(notificationManager, it)
             val duration = DeltaFormatter.nextChange(it.startTime)
+            val fixedDuration = (duration.isZero).let { if (it) duration.plusSeconds(1) else duration }
             Log.v("PersistentWorker", "In recess, next change is in ${duration.seconds}s")
 
             val notificationWorker = OneTimeWorkRequestBuilder<PersistentWorker>()
-                .setInitialDelay(duration)
+                .setInitialDelay(fixedDuration)
                 .build()
 
             WorkManager.getInstance(applicationContext).enqueueUniqueWork(

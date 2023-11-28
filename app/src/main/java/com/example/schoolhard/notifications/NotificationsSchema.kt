@@ -22,9 +22,9 @@ class NotificationsSchema {
 
             return NotificationCompat.Builder(context, channel.channelId)
                 .setChannelId(channel.channelId)
-                .setContentTitle(lesson.name)
-                .setSubText("${lesson.location} ${lesson.progress*100}% ${DeltaFormatter.getDurationString(lesson.endTime, expanded = true)}")
-                .setContentText("${lesson.startTime.format(format)} - ${lesson.endTime.format(format)} at ${lesson.location.name}")
+                .setContentTitle(DeltaFormatter.getDurationString(lesson.endTime, expanded = true))
+                .setSubText("${lesson.startTime.format(format)} - ${lesson.endTime.format(format)}")
+                .setContentText("${lesson.location.name} - ${lesson.name}")
                 .setSmallIcon(R.drawable.schoolhard_logo)
                 .setShowWhen(false)
                 .setOnlyAlertOnce(true)
